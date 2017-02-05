@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Cantus Firmus</string>
+    <string name="play_music_btn_text">Play Music</string>
+    <string name="selected_file_default_text">No file selected</string>
 </resources>
