@@ -2,11 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="group10.tcss450.uw.edu.cantusfirmus">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
 
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE">
-
-    </uses-permission>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,7 +17,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".audio_player"></activity>
+        <activity android:name=".audio_player" />
+        <activity android:name=".find_music"></activity>
     </application>
 
 </manifest>

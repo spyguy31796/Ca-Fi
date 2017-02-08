@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Cantus Firmus</string>
-    <string name="play_music_btn_text">Play Music</string>
+    <string name="play_music_btn_text">Play Local Music</string>
     <string name="selected_file_default_text">No file selected</string>
+    <string name="find_music_btn_text">Find Music</string>
+    <string name="song_title_hint">Song Title?</string>
+    <string name="search_lbl">Search</string>
 </resources>

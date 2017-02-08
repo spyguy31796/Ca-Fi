@@ -12,6 +12,7 @@
     tools:context="group10.tcss450.uw.edu.cantusfirmus.MainActivity">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -20,6 +21,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/MusicPlayerBtn"
         android:text="@string/play_music_btn_text"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ExternalPlayerBtn"
+        android:text="@string/find_music_btn_text"/>
+
     </LinearLayout>
 
 </LinearLayout>

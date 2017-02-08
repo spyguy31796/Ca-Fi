@@ -25,6 +25,13 @@ public class MainActivity extends AppCompatActivity {
                 playMusic(view);
             }
         });
+        Button findMusicBtn = (Button) findViewById(R.id.ExternalPlayerBtn);
+        findMusicBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                findMusic(view);
+            }
+        });
     }
 
     public void requestPermissions(){
@@ -50,7 +57,10 @@ public class MainActivity extends AppCompatActivity {
     private void playMusic(View view) {
         Intent intent = new Intent(this, audio_player.class);
         startActivity(intent);
-
+    }
+    private void findMusic(View view) {
+        Intent intent = new Intent(this, find_music.class);
+        startActivity(intent);
     }
 
 
