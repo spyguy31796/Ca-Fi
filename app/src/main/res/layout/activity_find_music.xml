@@ -21,5 +21,6 @@
         android:layout_width="wrap_content"
         android:layout_below="@+id/searchField"
         android:layout_height="wrap_content"
+        android:id="@+id/search_btn"
         android:text="@string/search_lbl"/>
 </RelativeLayout>
