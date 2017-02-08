@@ -5,4 +5,8 @@
     <string name="find_music_btn_text">Find Music</string>
     <string name="song_title_hint">Song Title?</string>
     <string name="search_lbl">Search</string>
+    <string name="login_lbl">Login</string>
+    <string name="register_lbl">Register</string>
+    <string name="tagLine">World\'s Best Music Player</string>
+    <string name="title">Ca-Fi</string>
 </resources>
