@@ -1,8 +1,11 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -60,12 +63,16 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
             handler.post(new Runnable(){
                @Override
                 public void run(){
+                   String urlString = "https://www.youtube.com/watch?v="+idString;
                    ClipboardManager clipboard = (ClipboardManager)
                            getSystemService(Context.CLIPBOARD_SERVICE);
-                   ClipData clip = ClipData.newPlainText("web-address","https://www.youtube.com/watch?v="+idString);
+                   ClipData clip = ClipData.newPlainText("web-address",urlString);
                    clipboard.setPrimaryClip(clip);
                    Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
-                   ((TextView)findViewById(R.id.displaySearch)).setText("https://www.youtube.com/watch?v="+idString);
+                   Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                   startActivity(intent);
+                   ((TextView)findViewById(R.id.displaySearch)).setText(urlString);
                }
             });
         }
