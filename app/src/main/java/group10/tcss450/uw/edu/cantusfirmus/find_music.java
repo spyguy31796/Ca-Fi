@@ -73,6 +73,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                    startActivity(intent);
                    ((TextView)findViewById(R.id.displaySearch)).setText(urlString);
+                   findViewById(R.id.search_btn).setEnabled(true);
                }
             });
         }
@@ -80,11 +81,12 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    v.setEnabled(false);
                     YTsearch();
                 } catch (IOException e) {
                     e.printStackTrace();
