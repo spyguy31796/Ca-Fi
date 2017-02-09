@@ -9,4 +9,12 @@
     <string name="register_lbl">Register</string>
     <string name="tagLine">World\'s Best Music Player</string>
     <string name="title">Ca-Fi</string>
+    <string name="password_lbl">Password</string>
+    <string name="email_address_lbl">Email Address</string>
+    <string name="first_name_lbl">First Name</string>
+    <string name="last_name_lbl">Last Name</string>
+    <string name="email_lbl">Email</string>
+    <string name="username_lbl">Username</string>
+    <string name="password_lbll">Password</string>
+    <string name="confirm_password_lbl">Confirm Password</string>
 </resources>

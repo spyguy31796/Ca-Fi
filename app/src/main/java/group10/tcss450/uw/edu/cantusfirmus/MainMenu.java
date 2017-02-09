@@ -4,14 +4,13 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainMenu extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_STORAGE = 0;
     private static final int MY_PERMISSIONS_REQUEST_INTERNET = 1;
     @Override
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     //Storage access is available
                 }else{
                     //Permission Denied
-                    Toast.makeText(MainActivity.this,"Storage Permission Denied, Playback Disabled",Toast.LENGTH_LONG);
+                    Toast.makeText(MainMenu.this,"Storage Permission Denied, Playback Disabled",Toast.LENGTH_LONG);
                 }
                 return;
             }
@@ -61,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                     //Internet access is available
                 }else{
                     //Permission Denied
-                    Toast.makeText(MainActivity.this,"Internet Permission Denied, Remote Playback Disabled",Toast.LENGTH_LONG);
+                    Toast.makeText(MainMenu.this,"Internet Permission Denied, Remote Playback Disabled",Toast.LENGTH_LONG);
                 }
                 return;
             }
