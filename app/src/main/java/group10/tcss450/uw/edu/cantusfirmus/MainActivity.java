@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_STORAGE = 0;
+    private static final int MY_PERMISSIONS_REQUEST_INTERNET = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         //Requests permissions
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_READ_STORAGE);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET},
+                        MY_PERMISSIONS_REQUEST_INTERNET);
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -49,6 +52,16 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     //Permission Denied
                     Toast.makeText(MainActivity.this,"Storage Permission Denied, Playback Disabled",Toast.LENGTH_LONG);
+                }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_INTERNET:{
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //Internet access is available
+                }else{
+                    //Permission Denied
+                    Toast.makeText(MainActivity.this,"Internet Permission Denied, Remote Playback Disabled",Toast.LENGTH_LONG);
                 }
                 return;
             }

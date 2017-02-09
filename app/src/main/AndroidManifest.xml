@@ -3,6 +3,7 @@
     package="group10.tcss450.uw.edu.cantusfirmus">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"

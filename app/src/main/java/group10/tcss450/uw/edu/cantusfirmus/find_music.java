@@ -1,10 +1,16 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.api.client.http.HttpRequest;
@@ -20,13 +26,14 @@ import java.util.List;
 
 
 public class find_music extends AppCompatActivity implements View.OnClickListener {
-
+    private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_music);
         Button b = ((Button)findViewById(R.id.search_btn));
         b.setOnClickListener(this);
+        handler = new Handler();
     }
     public String YTsearch() throws IOException {
         YouTube youTube;
@@ -46,17 +53,37 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         SearchListResponse searchResponse = search.execute();
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null){
-            Toast.makeText(find_music.this,searchResultList.get(0).toPrettyString(),Toast.LENGTH_LONG);
+            //Toast.makeText(find_music.this,searchResultList.get(0).toPrettyString(),Toast.LENGTH_LONG);
+            //System.out.println(searchResultList.get(0).toPrettyString());
+            //((TextView)findViewById(R.id.displaySearch)).setText("https://www.youtube.com/watch?v="+searchResultList.get(0).toPrettyString());
+            final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
+            handler.post(new Runnable(){
+               @Override
+                public void run(){
+                   ClipboardManager clipboard = (ClipboardManager)
+                           getSystemService(Context.CLIPBOARD_SERVICE);
+                   ClipData clip = ClipData.newPlainText("web-address","https://www.youtube.com/watch?v="+idString);
+                   clipboard.setPrimaryClip(clip);
+                   Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
+                   ((TextView)findViewById(R.id.displaySearch)).setText("https://www.youtube.com/watch?v="+idString);
+               }
+            });
         }
                 return null;
     }
 
     @Override
     public void onClick(View v) {
-        try {
-            YTsearch();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    YTsearch();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 }

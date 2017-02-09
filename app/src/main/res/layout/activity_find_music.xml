@@ -23,4 +23,10 @@
         android:layout_height="wrap_content"
         android:id="@+id/search_btn"
         android:text="@string/search_lbl"/>
+    <TextView
+        android:layout_below="@id/search_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nothing Searched For"
+        android:id="@+id/displaySearch"/>
 </RelativeLayout>
