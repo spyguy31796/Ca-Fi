@@ -55,10 +55,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         search.setMaxResults((long)1);
         SearchListResponse searchResponse = search.execute();
         List<SearchResult> searchResultList = searchResponse.getItems();
-        if(searchResultList!=null){
-            //Toast.makeText(find_music.this,searchResultList.get(0).toPrettyString(),Toast.LENGTH_LONG);
-            //System.out.println(searchResultList.get(0).toPrettyString());
-            //((TextView)findViewById(R.id.displaySearch)).setText("https://www.youtube.com/watch?v="+searchResultList.get(0).toPrettyString());
+        if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
             handler.post(new Runnable(){
                @Override
@@ -73,8 +70,14 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                    startActivity(intent);
                    ((TextView)findViewById(R.id.displaySearch)).setText(urlString);
-                   findViewById(R.id.search_btn).setEnabled(true);
                }
+            });
+        }else{
+            handler.post(new Runnable(){
+                @Override
+                public void run(){
+                    findViewById(R.id.search_btn).setEnabled(true);
+                }
             });
         }
                 return null;
