@@ -21,8 +21,14 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+
+import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
@@ -30,6 +36,7 @@ public class audio_player extends ListActivity {
 
     private static final int UPDATE_FREQUENCY = 500;
     private static final int STEP_VALUE = 4000;
+    private static Response networkAudio;
 
     private MediaCursorAdapter mediaAdapter = null;
     private TextView selelctedFile = null;
@@ -91,9 +98,11 @@ public class audio_player extends ListActivity {
         try{
             String url = b.getString("web");
             Log.d("url",url);
-            startPlayExternal(url);
+            startPlay(url);
+            //startPlay(networkAudio.body().byteStream());
         }catch(Exception ex){
-
+            //Log.d("Exception",ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -197,11 +206,33 @@ public class audio_player extends ListActivity {
 
         isMusicPlaying = true;
     }
-    private void startPlayExternal(String url) throws IOException{
-        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mp.setDataSource(url);
-        mp.prepare();
-        mp.start();
+    private void startPlay(FileInputStream fid) throws IOException{
+        //Log.i("Selected: ", file);
+        //selelctedFile.setText(file);
+        Log.d("FID",fid.getFD().toString());
+        mySeekbar.setProgress(0);
+
+        mp.stop();
+        mp.reset();
+
+        try {
+            mp.setDataSource(fid.getFD());
+            mp.prepare();
+            mp.start();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mySeekbar.setMax(mp.getDuration());
+        playButton.setImageResource(android.R.drawable.ic_media_pause);
+
+        updatePosition();
+
+        isMusicPlaying = true;
     }
 
     private void stopPlay() {
@@ -302,5 +333,7 @@ public class audio_player extends ListActivity {
             return v;
         }
     }
-
+    public static void setNetworkAudio(Response rs){
+        networkAudio = rs;
+    }
 }

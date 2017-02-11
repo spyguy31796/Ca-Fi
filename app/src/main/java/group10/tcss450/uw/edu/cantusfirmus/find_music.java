@@ -22,8 +22,17 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 public class find_music extends AppCompatActivity implements View.OnClickListener {
@@ -55,6 +64,27 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
+            OkHttpClient client = new OkHttpClient();
+            MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+            RequestBody body = RequestBody.create(mediaType, "youtubeID="+idString);
+            Request request = new Request.Builder()
+                    .url("https://hidden-scrubland-70822.herokuapp.com/stream_yt")
+                    .post(body)
+                    .addHeader("content-type", "application/x-www-form-urlencoded")
+                    .addHeader("cache-control", "no-cache")
+                    .addHeader("postman-token", "68f30572-d738-00dd-0ffd-bdb134c10bae")
+                    .build();
+            Response response = client.newCall(request).execute();
+            final File file = new File(getCacheDir(),"cacheFileAppeal.sr1");
+            OutputStream out = new FileOutputStream(file);
+            byte buffer[] = new byte[6*1024];
+            int length;
+            while((length = response.body().byteStream().read(buffer))!=-1){
+                out.write(buffer,0,length);
+            }
+            out.flush();
+            out.close();
+            //audio_player.setNetworkAudio(response);
             handler.post(new Runnable(){
                @Override
                 public void run(){
@@ -64,13 +94,13 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    ClipData clip = ClipData.newPlainText("web-address",urlString);
                    clipboard.setPrimaryClip(clip);
                    Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
-                   //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-                   //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                    Intent intent = new Intent(find_music.this,audio_player.class);
                    Bundle b = new Bundle();
-                   b.putString("web","https://www.youtube.com/watch?v="+idString);
+                   b.putString("web",file.getAbsolutePath());
                    intent.putExtras(b);
                    startActivity(intent);
+                   //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                   //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                    //((TextView)findViewById(R.id.displaySearch)).setText(urlString);
                }
             });
