@@ -24,6 +24,11 @@ import java.math.BigDecimal;
 
 import static android.content.ContentValues.TAG;
 
+/**
+ * This class holds the audio player and the components that make up the audio player activity.
+ * @author Jabo Johnigan
+ * @version Feb 1 2017
+ */
 public class audio_player extends ListActivity {
 
     private static final int UPDATE_FREQUENCY = 500;
@@ -68,7 +73,7 @@ public class audio_player extends ListActivity {
         mySeekbar.setOnSeekBarChangeListener(seekBarChangedListener);
 
         if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            Log.v(TAG, "Permission is granted");
+            Log.v(TAG, "Permission has been granted for thee who wish to ROCK AND ROLL");
             //File write logic here
             Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
             if (null != cursor) {
@@ -88,8 +93,109 @@ public class audio_player extends ListActivity {
 
     }
 
+
+    /**
+     * This method handles when an item in the list of music is clicked.
+     * @param list the listView containing the songs
+     * @param view the listView obj
+     * @param position which position in the list the current item is
+     * @param id the id associated with the particular listview item
+     */
+    @Override
+    protected void onListItemClick(ListView list, View view, int position, long id) {
+        super.onListItemClick(list, view, position, id);
+
+        currentFile = (String) view.getTag();
+
+        startPlay(currentFile);
+    }
+
+    /**
+     * This method handles what happens to the audio_player once you exit the audio_player activity.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        handler.removeCallbacks(updatePositionRunnable);
+        mp.stop();
+        mp.reset();
+        mp.release();
+
+        mp = null;
+    }
+
+    /**
+     * This method handles what happens when you select a file from the list.
+     * @param file a file to be used for playing audio
+     */
+    private void startPlay(String file) {
+        Log.i("Selected: ", file);
+
+        selelctedFile.setText(file);
+        mySeekbar.setProgress(0);
+
+        mp.stop();
+        mp.reset();
+
+        try {
+            mp.setDataSource(file);
+            mp.prepare();
+            mp.start();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mySeekbar.setMax(mp.getDuration());
+        playButton.setImageResource(android.R.drawable.ic_media_pause);
+
+        updatePosition();
+
+        isMusicPlaying = true;
+    }
+
+
+    /**
+     * This method handles what happens when stop playing music in the audio_player.
+     */
+    private void stopPlay() {
+        mp.stop();
+        mp.reset();
+        playButton.setImageResource(android.R.drawable.ic_media_play);
+        handler.removeCallbacks(updatePositionRunnable);
+        mySeekbar.setProgress(0);
+
+        isMusicPlaying = false;
+    }
+
+    /**
+     * This method updates the position of the slider and handles the time it takes to update each
+     * clock cycle.
+     */
+    private void updatePosition() {
+        handler.removeCallbacks(updatePositionRunnable);
+
+        mySeekbar.setProgress(mp.getCurrentPosition());
+
+        handler.postDelayed(updatePositionRunnable, UPDATE_FREQUENCY);
+    }
+
+
+    /**
+     * An onClickListener view obj that handles the case when the play, fwdseek, and prevseek buttons
+     * are clicked.
+     */
     private View.OnClickListener onButtonClick = new View.OnClickListener() {
 
+        /**
+         * This overridden method will take the view and check which was pressed and launch another
+         * method accordingly.
+         * @param v the current view/button being pressed
+         */
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
@@ -139,75 +245,10 @@ public class audio_player extends ListActivity {
         }
     };
 
-
-    @Override
-    protected void onListItemClick(ListView list, View view, int position, long id) {
-        super.onListItemClick(list, view, position, id);
-
-        currentFile = (String) view.getTag();
-
-        startPlay(currentFile);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        handler.removeCallbacks(updatePositionRunnable);
-        mp.stop();
-        mp.reset();
-        mp.release();
-
-        mp = null;
-    }
-
-    private void startPlay(String file) {
-        Log.i("Selected: ", file);
-
-        selelctedFile.setText(file);
-        mySeekbar.setProgress(0);
-
-        mp.stop();
-        mp.reset();
-
-        try {
-            mp.setDataSource(file);
-            mp.prepare();
-            mp.start();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        mySeekbar.setMax(mp.getDuration());
-        playButton.setImageResource(android.R.drawable.ic_media_pause);
-
-        updatePosition();
-
-        isMusicPlaying = true;
-    }
-
-    private void stopPlay() {
-        mp.stop();
-        mp.reset();
-        playButton.setImageResource(android.R.drawable.ic_media_play);
-        handler.removeCallbacks(updatePositionRunnable);
-        mySeekbar.setProgress(0);
-
-        isMusicPlaying = false;
-    }
-
-    private void updatePosition() {
-        handler.removeCallbacks(updatePositionRunnable);
-
-        mySeekbar.setProgress(mp.getCurrentPosition());
-
-        handler.postDelayed(updatePositionRunnable, UPDATE_FREQUENCY);
-    }
-
+    /**
+     * An onCompletionListener obj to handle what happens when the media player completes playing
+     * music or is stopped.
+     */
     private MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
 
         @Override
@@ -216,6 +257,9 @@ public class audio_player extends ListActivity {
         }
     };
 
+    /**
+     * An onErrorListener obj to handle errors thrown by the media player, if any.
+     */
     private MediaPlayer.OnErrorListener onErrorListener = new MediaPlayer.OnErrorListener() {
 
         @Override
@@ -224,6 +268,7 @@ public class audio_player extends ListActivity {
             return false;
         }
     };
+
 
     private SeekBar.OnSeekBarChangeListener seekBarChangedListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -246,14 +291,34 @@ public class audio_player extends ListActivity {
         }
     };
 
+
+    /**
+     * This private inner class is the media cursor adapter that gets the song information and links
+     * it with the media player playback to display the information.
+     * @author Jabo Johnigan
+     * @version Feb 1, 2017
+     */
     private class MediaCursorAdapter extends SimpleCursorAdapter {
 
+        /**
+         * Constructs a media cursor adapter that parses the information stored from whatever data
+         * stream its given.
+         * @param context a context obj to get information about the current state of the application
+         * @param layout layout of the current view
+         * @param c the cursor
+         */
         public MediaCursorAdapter(Context context, int layout, Cursor c) {
             super(context, layout, c,
                     new String[]{MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.TITLE, MediaStore.Audio.AudioColumns.DURATION},
                     new int[]{R.id.displayname, R.id.title, R.id.duration});
         }
 
+        /**
+         * This method handles the formatting of the audio track in the list view.
+         * @param view current view of the listView
+         * @param context the context of the application
+         * @param cursor the current media cursor
+         */
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             TextView title = (TextView) view.findViewById(R.id.title);
@@ -278,6 +343,13 @@ public class audio_player extends ListActivity {
             view.setTag(cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA)));
         }
 
+        /**
+         * Creates a new list based off the the specs in the song_item xml
+         * @param context the current context of the application
+         * @param cursor the media player cursor
+         * @param parent the encapsulating view
+         * @return the listView
+         */
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             LayoutInflater inflater = LayoutInflater.from(context);
