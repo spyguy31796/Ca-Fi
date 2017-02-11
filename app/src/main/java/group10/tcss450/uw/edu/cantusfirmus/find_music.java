@@ -64,10 +64,14 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    ClipData clip = ClipData.newPlainText("web-address",urlString);
                    clipboard.setPrimaryClip(clip);
                    Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
-                   Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                   //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                   //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                   Intent intent = new Intent(find_music.this,audio_player.class);
+                   Bundle b = new Bundle();
+                   b.putString("web","https://www.youtube.com/watch?v="+idString);
+                   intent.putExtras(b);
                    startActivity(intent);
-                   ((TextView)findViewById(R.id.displaySearch)).setText(urlString);
+                   //((TextView)findViewById(R.id.displaySearch)).setText(urlString);
                }
             });
         }else{

@@ -10,7 +10,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.CookiePolicy;
 
+import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,7 +31,6 @@ public class register extends AppCompatActivity implements View.OnClickListener 
     }
     private void register(String email, String password, String firstName, String lastName, String userName)throws IOException{
         OkHttpClient client = new OkHttpClient();
-
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType, "email="+email+"&password="+password+"&firstName="+firstName+"&lastName="+lastName+"&userName="+userName);
         Request request = new Request.Builder()
@@ -47,9 +48,8 @@ public class register extends AppCompatActivity implements View.OnClickListener 
                 if(details[0].contains("error")){
                     Toast.makeText(register.this,"Username or Email already taken!",Toast.LENGTH_LONG).show();
                 }else{
-                    Toast.makeText(register.this,"Registration Succesful, Logging in!", Toast.LENGTH_LONG).show();
-                    Intent i = new Intent(register.this,MainMenu.class);
-                    startActivity(i);
+                    Toast.makeText(register.this,"Registration Successful, Please Log in!", Toast.LENGTH_LONG).show();
+                    finish();
                 }
             }
         });
@@ -60,17 +60,26 @@ public class register extends AppCompatActivity implements View.OnClickListener 
         final String firstName = ((EditText)findViewById(R.id.reg_firstName)).getText().toString().replace(" ","%40");
         final String lastName = ((EditText)findViewById(R.id.reg_lastName)).getText().toString().replace(" ","%40");
         final String userName = ((EditText)findViewById(R.id.reg_userName)).getText().toString().replace(" ","%40");
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    register(email,password,firstName,lastName,userName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        String testPword = ((EditText)findViewById(R.id.reg_password)).getText().toString();
+        String testPword2 = ((EditText)findViewById(R.id.reg_confirmPass)).getText().toString();
+        if(testPword.equals(testPword2)) {
+            if(email.contains("@")) {
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            register(email, password, firstName, lastName, userName);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                thread.start();
+            }else{
+                ((EditText)findViewById(R.id.reg_email)).setError("Invalid email address");
             }
-        });
-        thread.start();
+        }else{
+            ((EditText)findViewById(R.id.reg_confirmPass)).setError("Passwords do not match!");
+        }
     }
 }

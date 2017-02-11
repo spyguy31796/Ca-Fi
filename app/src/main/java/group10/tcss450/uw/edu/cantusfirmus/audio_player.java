@@ -2,8 +2,10 @@ package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -84,8 +86,15 @@ public class audio_player extends ListActivity {
             }
 
         }
+        Intent i = getIntent();
+        Bundle b = i.getExtras();
+        try{
+            String url = b.getString("web");
+            Log.d("url",url);
+            startPlayExternal(url);
+        }catch(Exception ex){
 
-
+        }
     }
 
     private View.OnClickListener onButtonClick = new View.OnClickListener() {
@@ -163,7 +172,6 @@ public class audio_player extends ListActivity {
 
     private void startPlay(String file) {
         Log.i("Selected: ", file);
-
         selelctedFile.setText(file);
         mySeekbar.setProgress(0);
 
@@ -188,6 +196,12 @@ public class audio_player extends ListActivity {
         updatePosition();
 
         isMusicPlaying = true;
+    }
+    private void startPlayExternal(String url) throws IOException{
+        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mp.setDataSource(url);
+        mp.prepare();
+        mp.start();
     }
 
     private void stopPlay() {
