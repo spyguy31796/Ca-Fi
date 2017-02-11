@@ -88,17 +88,18 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
             handler.post(new Runnable(){
                @Override
                 public void run(){
-                   String urlString = "https://www.youtube.com/watch?v="+idString;
-                   ClipboardManager clipboard = (ClipboardManager)
-                           getSystemService(Context.CLIPBOARD_SERVICE);
-                   ClipData clip = ClipData.newPlainText("web-address",urlString);
-                   clipboard.setPrimaryClip(clip);
-                   Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
+                   //String urlString = "https://www.youtube.com/watch?v="+idString;
+                   //ClipboardManager clipboard = (ClipboardManager)
+                   //        getSystemService(Context.CLIPBOARD_SERVICE);
+                   //ClipData clip = ClipData.newPlainText("web-address",urlString);
+                   //clipboard.setPrimaryClip(clip);
+                   //Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
                    Intent intent = new Intent(find_music.this,audio_player.class);
                    Bundle b = new Bundle();
                    b.putString("web",file.getAbsolutePath());
                    intent.putExtras(b);
                    findViewById(R.id.search_btn).setEnabled(true);
+                   findViewById(R.id.progress).setVisibility(View.GONE);
                    startActivity(intent);
                    //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -119,6 +120,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onClick(final View v) {
         v.setEnabled(false);
+        findViewById(R.id.progress).setVisibility(View.VISIBLE);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
