@@ -17,4 +17,6 @@
     <string name="username_lbl">Username</string>
     <string name="password_lbll">Password</string>
     <string name="confirm_password_lbl">Confirm Password</string>
+    <string name="user_info_lbl">User Info</string>
+    <string name="getting_info_lbl">Getting Information From Server!</string>
 </resources>

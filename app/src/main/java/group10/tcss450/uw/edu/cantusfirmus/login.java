@@ -13,7 +13,9 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.HttpCookie;
 
+import okhttp3.Cookie;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -23,6 +25,7 @@ import okhttp3.Response;
 
 public class login extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
+    static final CookieManager cm = new CookieManager();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +35,6 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         handler = new Handler();
     }
     private void login(String login, String password) throws IOException{
-        CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(cm)).build();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
@@ -80,5 +82,8 @@ public class login extends AppCompatActivity implements View.OnClickListener {
             }
         });
         thread.start();
+    }
+    public static CookieManager getCookieManager(){
+        return cm;
     }
 }
