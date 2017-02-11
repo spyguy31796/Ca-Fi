@@ -21,6 +21,8 @@ import okhttp3.Response;
  * Register screen for registering a new account with the server, uses okhttp.
  * The register activity also checks to verify that the password matches the password confirm and that the email address contains
  * and @ symbol.
+ * @author Alec Walsh
+ * @version Feb 10 2017
  */
 public class register extends AppCompatActivity implements View.OnClickListener {
     /***

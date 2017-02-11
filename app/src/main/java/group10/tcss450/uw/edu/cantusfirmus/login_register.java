@@ -8,6 +8,8 @@ import android.widget.Button;
 
 /***
  * This is the first page you see on the app, including the title, login, and register buttons.
+ * @author Alec Walsh
+ * @version Feb 10 2017
  */
 public class login_register extends AppCompatActivity implements View.OnClickListener {
 

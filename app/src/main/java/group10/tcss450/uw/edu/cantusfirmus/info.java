@@ -19,6 +19,8 @@ import okhttp3.Response;
 /***
  * Class to display registration info. More information will be shown here later.
  * Currently it is here to show that the user login works.
+ * @author Alec Walsh
+ * @version Feb 10 2017
  */
 public class info extends AppCompatActivity {
     /***

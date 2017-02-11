@@ -25,6 +25,8 @@ import okhttp3.Response;
 
 /***
  * The login page. Communicates with the server using OkHttp.
+ * @author Alec Walsh
+ * @version Feb 10 2017
  */
 public class login extends AppCompatActivity implements View.OnClickListener {
     /***

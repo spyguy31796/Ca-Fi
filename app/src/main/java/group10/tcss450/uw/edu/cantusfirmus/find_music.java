@@ -30,6 +30,8 @@ import okhttp3.Response;
 
 /***
  * This activity is where music not in the local library can be searched for. Currently it only supports youtube.
+ * @author Alec Walsh
+ * @version Feb 10 2017
  */
 public class find_music extends AppCompatActivity implements View.OnClickListener {
     /***

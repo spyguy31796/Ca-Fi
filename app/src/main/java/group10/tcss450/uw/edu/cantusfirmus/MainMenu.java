@@ -27,6 +27,8 @@ import okhttp3.Response;
 
 /***
  * MainMenu of the application, after logging in, the user is presented this screen.
+ * @author Alec Walsh
+ * @version Feb 10 2017
  */
 public class MainMenu extends AppCompatActivity {
     /**
