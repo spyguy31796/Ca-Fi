@@ -98,6 +98,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    Bundle b = new Bundle();
                    b.putString("web",file.getAbsolutePath());
                    intent.putExtras(b);
+                   findViewById(R.id.search_btn).setEnabled(true);
                    startActivity(intent);
                    //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
