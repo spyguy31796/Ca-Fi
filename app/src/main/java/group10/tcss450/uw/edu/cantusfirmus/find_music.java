@@ -1,18 +1,12 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -34,8 +28,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
+/***
+ * This activity is where music not in the local library can be searched for. Currently it only supports youtube.
+ */
 public class find_music extends AppCompatActivity implements View.OnClickListener {
+    /***
+     * Handler allowing other threads to touch the UI thread.
+     */
     private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +44,16 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         b.setOnClickListener(this);
         handler = new Handler();
     }
-    public String YTsearch() throws IOException {
+
+    /***
+     * This method handles the interactions with the Youtube api. Searching for the first music video related to your search terms.
+     * Then the video id is passed to our server where the video is processed and the mp3 is sent back in a response. The mp3 is saved in the
+     * cache and transitioned to the music player where it is played.
+     * @throws IOException If there is a server issues, an IOException can be thrown.
+     */
+    public void YTsearch() throws IOException {
         YouTube youTube;
+        //Needs to be removed from the source code.
         String apiKey = "AIzaSyBktpICzt4gZSd08s44i1UmbsQBKoxEXDE";
         youTube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), new HttpRequestInitializer(){
             public void initialize(HttpRequest request) throws IOException{
@@ -86,6 +93,10 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
             out.close();
             //audio_player.setNetworkAudio(response);
             handler.post(new Runnable(){
+                /***
+                 * The commented out code is for sending the video id to the youtube app instead of listening natively in the app.
+                 * The code remains here in the event we decide to implement that feature again.
+                 */
                @Override
                 public void run(){
                    //String urlString = "https://www.youtube.com/watch?v="+idString;
@@ -114,9 +125,12 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                 }
             });
         }
-                return null;
     }
 
+    /***
+     * Handles the search button press, creating another thread for the server communication and search function.
+     * @param v the button pressed.
+     */
     @Override
     public void onClick(final View v) {
         v.setEnabled(false);

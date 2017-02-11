@@ -1,6 +1,5 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
-import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,16 +9,23 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.net.CookiePolicy;
 
-import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+
+/***
+ * Register screen for registering a new account with the server, uses okhttp.
+ * The register activity also checks to verify that the password matches the password confirm and that the email address contains
+ * and @ symbol.
+ */
 public class register extends AppCompatActivity implements View.OnClickListener {
+    /***
+     * Handler to allow other threads to touch the UI thread.
+     */
     private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +35,17 @@ public class register extends AppCompatActivity implements View.OnClickListener 
         b.setOnClickListener(this);
         handler = new Handler();
     }
+
+    /***
+     * Register function creates an OkHttpClient and a request which contains all the registration data.
+     * This is all sent to the server, and a response is generated which is check for a success or failure report.
+     * @param email the email to register to the account.
+     * @param password the password for the account.
+     * @param firstName the first name for the account.
+     * @param lastName the last name for the account.
+     * @param userName the username for the account.
+     * @throws IOException thrown if there is a network issue.
+     */
     private void register(String email, String password, String firstName, String lastName, String userName)throws IOException{
         OkHttpClient client = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
@@ -54,6 +71,11 @@ public class register extends AppCompatActivity implements View.OnClickListener 
             }
         });
     }
+
+    /***
+     * Handles the registration button click. Does the input validation.
+     * @param view the button clicked.
+     */
     public void onClick(View view){
         final String email = ((EditText)findViewById(R.id.reg_email)).getText().toString().replace(" ","%40");
         final String password = ((EditText)findViewById(R.id.reg_password)).getText().toString().replace(" ","%40");

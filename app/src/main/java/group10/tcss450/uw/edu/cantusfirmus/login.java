@@ -23,8 +23,17 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/***
+ * The login page. Communicates with the server using OkHttp.
+ */
 public class login extends AppCompatActivity implements View.OnClickListener {
+    /***
+     * Handler to allow other threads to touch the UI thread.
+     */
     private Handler handler;
+    /***
+     * Cookie manager to keep the login cookie.
+     */
     static final CookieManager cm = new CookieManager();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +43,14 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         b.setOnClickListener(this);
         handler = new Handler();
     }
+
+    /***
+     * Login function, creates and OkHttpClient and generates a request, seding it to the server. The response is stored,
+     * and the cookie is also kept.
+     * @param login the email to use in the login attempt.
+     * @param password the password to use in the login attempt.
+     * @throws IOException In the event of an izssue with the server, an IOException may be generated.
+     */
     private void login(String login, String password) throws IOException{
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(cm)).build();
@@ -64,11 +81,12 @@ public class login extends AppCompatActivity implements View.OnClickListener {
             }
         });
     }
-    //{"error":"Error: no user found with this email"}
+
+    /***
+     * Click listener for the login button.
+     * @param view the button clicked.
+     */
     public void onClick(View view){
-        //Replace this with real login code
-        //Intent i = new Intent(this,MainMenu.class);
-        //startActivity(i);
         final String login = ((EditText)findViewById(R.id.username_field)).getText().toString().replace(" ","%40");
         final String password = ((EditText)findViewById(R.id.password_field)).getText().toString().replace(" ","%40");
         Thread thread = new Thread(new Runnable() {
@@ -83,6 +101,11 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         });
         thread.start();
     }
+
+    /***
+     * Allows the cookiemanager to be accessed in other classes.
+     * @return CookieManager for the current session.
+     */
     public static CookieManager getCookieManager(){
         return cm;
     }

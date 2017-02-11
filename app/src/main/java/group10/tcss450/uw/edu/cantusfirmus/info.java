@@ -16,10 +16,25 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/***
+ * Class to display registration info. More information will be shown here later.
+ * Currently it is here to show that the user login works.
+ */
 public class info extends AppCompatActivity {
+    /***
+     * Handler to allow other threads to touch the UI thread.
+     */
     private Handler handler;
+    /***
+     * An array holding all the display text fields.
+     */
     private final TextView[] boxes = new TextView[4];
-    private final CookieManager cm = new CookieManager();
+
+    /***
+     * Immediately calls another function to grab the info from the server.
+     * Creates a new thread to do the networking.
+     * @param savedInstanceState required bundle.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +56,12 @@ public class info extends AppCompatActivity {
         });
         thread.start();
     }
+
+    /***
+     * Uses okHttp to grab the user info from the server. A request is formed and sent to the server.
+     * The response is checked to make sure that the request was successful. Then the EditTexts were filled in.
+     * @throws IOException Thrown if there is a issue with the server.
+     */
     private void get_info() throws IOException{
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager())).build();
         Request request = new Request.Builder()
