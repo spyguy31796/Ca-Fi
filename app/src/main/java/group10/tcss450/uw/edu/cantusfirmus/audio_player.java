@@ -41,7 +41,6 @@ public class audio_player extends ListActivity {
 
     private static final int UPDATE_FREQUENCY = 500;
     private static final int STEP_VALUE = 4000;
-    private static Response networkAudio;
 
     private MediaCursorAdapter mediaAdapter = null;
     private TextView selelctedFile = null;
@@ -102,6 +101,7 @@ public class audio_player extends ListActivity {
         Bundle b = i.getExtras();
         try{
             String url = b.getString("web");
+            i.removeExtra("web");
             Log.d("url",url);
             startPlay(url);
             //startPlay(networkAudio.body().byteStream());
@@ -404,8 +404,5 @@ public class audio_player extends ListActivity {
 
             return v;
         }
-    }
-    public static void setNetworkAudio(Response rs){
-        networkAudio = rs;
     }
 }
