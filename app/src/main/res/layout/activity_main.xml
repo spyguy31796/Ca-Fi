@@ -21,12 +21,16 @@
         android:layout_height="wrap_content"
         android:id="@+id/MusicPlayerBtn"
         android:text="@string/play_music_btn_text"/>
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/ExternalPlayerBtn"
         android:text="@string/find_music_btn_text"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/UserInfoBtn"
+        android:text="@string/user_info_lbl"/>
 
     </LinearLayout>
 

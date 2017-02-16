@@ -6,6 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+/***
+ * This is the first page you see on the app, including the title, login, and register buttons.
+ * @author Alec Walsh
+ * @version Feb 10 2017
+ */
 public class login_register extends AppCompatActivity implements View.OnClickListener {
 
     @Override
@@ -17,6 +22,11 @@ public class login_register extends AppCompatActivity implements View.OnClickLis
         b = (Button)findViewById(R.id.register_btn);
         b.setOnClickListener(this);
     }
+
+    /***
+     * Takes you to either the login or register pages.
+     * @param view the button clicked.
+     */
     public void onClick(View view){
         Intent i;
         switch (view.getId()){

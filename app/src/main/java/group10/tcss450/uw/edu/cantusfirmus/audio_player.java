@@ -2,8 +2,10 @@ package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -19,8 +21,14 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+
+import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
@@ -89,8 +97,18 @@ public class audio_player extends ListActivity {
             }
 
         }
-
-
+        Intent i = getIntent();
+        Bundle b = i.getExtras();
+        try{
+            String url = b.getString("web");
+            i.removeExtra("web");
+            Log.d("url",url);
+            startPlay(url);
+            //startPlay(networkAudio.body().byteStream());
+        }catch(Exception ex){
+            //Log.d("Exception",ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
 
@@ -131,7 +149,6 @@ public class audio_player extends ListActivity {
      */
     private void startPlay(String file) {
         Log.i("Selected: ", file);
-
         selelctedFile.setText(file);
         mySeekbar.setProgress(0);
 
@@ -140,6 +157,34 @@ public class audio_player extends ListActivity {
 
         try {
             mp.setDataSource(file);
+            mp.prepare();
+            mp.start();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mySeekbar.setMax(mp.getDuration());
+        playButton.setImageResource(android.R.drawable.ic_media_pause);
+
+        updatePosition();
+
+        isMusicPlaying = true;
+    }
+    private void startPlay(FileInputStream fid) throws IOException{
+        //Log.i("Selected: ", file);
+        //selelctedFile.setText(file);
+        Log.d("FID",fid.getFD().toString());
+        mySeekbar.setProgress(0);
+
+        mp.stop();
+        mp.reset();
+
+        try {
+            mp.setDataSource(fid.getFD());
             mp.prepare();
             mp.start();
         } catch (IllegalArgumentException e) {
@@ -360,5 +405,4 @@ public class audio_player extends ListActivity {
             return v;
         }
     }
-
 }
