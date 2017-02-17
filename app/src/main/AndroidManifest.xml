@@ -18,11 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".audio_player" />
+        <activity android:name=".audio_player"
+            android:configChanges="orientation|keyboardHidden|screenSize"/>
         <activity android:name=".find_music" />
         <activity android:name=".MainMenu" />
         <activity android:name=".login" />
-        <activity android:name=".register"></activity>
+        <activity android:name=".register" />
+        <activity android:name=".info"/>
     </application>
 
 </manifest>
