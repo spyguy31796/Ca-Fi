@@ -9,7 +9,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context="group10.tcss450.uw.edu.cantusfirmus.audio_player">
+    tools:context="group10.tcss450.uw.edu.cantusfirmus.audio_player"
+    android:weightSum="1">
 
 
     <LinearLayout
@@ -68,8 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:id="@android:id/list"
-        android:layout_weight="1.0"/>
-
+        android:layout_weight="0.84" />
 
 
 </LinearLayout>

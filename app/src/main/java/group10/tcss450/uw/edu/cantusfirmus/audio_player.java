@@ -174,6 +174,10 @@ public class audio_player extends ListActivity {
 
         isMusicPlaying = true;
     }
+
+
+    // Might be used later for file streaming instead of just local download. WIP
+    /*
     private void startPlay(FileInputStream fid) throws IOException{
         //Log.i("Selected: ", file);
         //selelctedFile.setText(file);
@@ -202,7 +206,7 @@ public class audio_player extends ListActivity {
 
         isMusicPlaying = true;
     }
-
+    */
 
     /**
      * This method handles what happens when stop playing music in the audio_player.
