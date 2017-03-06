@@ -1,7 +1,9 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,8 +16,11 @@ import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Cookie;
+import okhttp3.HttpUrl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -34,6 +39,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
      * Handler to allow other threads to touch the UI thread.
      */
     private Handler handler;
+    SharedPreferences mPrefs;
     /***
      * Cookie manager to keep the login cookie.
      */
@@ -41,10 +47,36 @@ public class login extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         setContentView(R.layout.activity_login);
         b = (Button)findViewById(R.id.perform_login);
         b.setOnClickListener(this);
         handler = new Handler();
+        String tempCookie = mPrefs.getString("session","");
+        Log.d("COOKIE!!!",tempCookie);
+        if(!(tempCookie.equals(""))){
+            //Cookie.parse(null,"str");
+            //Cookie.Builder ce = new Cookie.Builder();
+            Cookie ce = new Cookie.Builder().domain("damp-anchorage-73052.herokuapp.com").name("session").value(tempCookie).build();
+            Log.d("Generated Cookie",ce.toString());
+            List cookie = new ArrayList();
+            cookie.add(ce);
+            if(cookie!=null){
+                Log.d("COOKIE ADDED","It was added");
+                new JavaNetCookieJar(cm).saveFromResponse(HttpUrl.parse("https://damp-anchorage-73052.herokuapp.com/"),cookie);
+            }
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        test_Cookie();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.start();
+        }
     }
 
     /***
@@ -67,9 +99,12 @@ public class login extends AppCompatActivity implements View.OnClickListener {
                 .addHeader("postman-token", "6001af9e-af55-fdfa-6ffa-7dbb370b2ac3")
                 .build();
         final Response response = client.newCall(request).execute();
-        Log.d("response",response.peekBody(Long.valueOf("100")).string());
+        //Log.d("response",response.peekBody(Long.valueOf("100")).string());
         final String[] details = response.body().string().split(",");
-        //Log.d("Cookies",cm.getCookieStore().getCookies().get(0).toString());
+        Log.d("Cookies",cm.getCookieStore().getCookies().get(0).toString());
+        Log.d("Cookies",cm.getCookieStore().getCookies().get(0).getDomain());
+        //Log.d("Cookies",cm.getCookieStore().getCookies().get(0).getCommentURL());
+        mPrefs.edit().putString("session",cm.getCookieStore().getCookies().get(0).getValue()).apply();
         handler.post(new Runnable(){
             @Override
             public void run(){
@@ -113,5 +148,29 @@ public class login extends AppCompatActivity implements View.OnClickListener {
      */
     public static CookieManager getCookieManager(){
         return cm;
+    }
+
+    private void test_Cookie() throws IOException{
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager())).build();
+        Request request = new Request.Builder()
+                .url("https://damp-anchorage-73052.herokuapp.com/user_info")
+                .header("session",cm.getCookieStore().getCookies().get(0).getValue())
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("postman-token", "536e387f-52c2-946a-fdac-79006118dbc8")
+                .build();
+        Response response = client.newCall(request).execute();
+        final String[] details = response.body().string().split(",");
+        Log.d("LOOKLISTEN",details[0]);
+        handler.post(new Runnable(){
+            @Override
+            public void run(){
+                if(details[0].contains("error")){
+                }else{
+                    Intent i = new Intent(login.this,MainMenu.class);
+                    startActivity(i);
+                }
+            }
+        });
     }
 }

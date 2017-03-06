@@ -67,10 +67,10 @@ public class info extends AppCompatActivity {
     private void get_info() throws IOException{
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager())).build();
         Request request = new Request.Builder()
-                .url("https://hidden-scrubland-70822.herokuapp.com/user_info")
+                .url("https://damp-anchorage-73052.herokuapp.com/user_info")
                 .get()
                 .addHeader("cache-control", "no-cache")
-                .addHeader("postman-token", "26a87bc6-4ccc-e94b-8c29-792fb67404d3")
+                .addHeader("postman-token", "536e387f-52c2-946a-fdac-79006118dbc8")
                 .build();
         Response response = client.newCall(request).execute();
         final String[] details = response.body().string().split(",");
