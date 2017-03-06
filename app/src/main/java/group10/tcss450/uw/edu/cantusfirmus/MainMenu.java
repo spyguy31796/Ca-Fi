@@ -168,6 +168,7 @@ public class MainMenu extends AppCompatActivity {
         handler.post(new Runnable(){
             @Override
             public void run(){
+                login.clearShared();
                 finish();
             }
         });
