@@ -25,6 +25,7 @@ import okhttp3.Response;
  * @version Feb 10 2017
  */
 public class register extends AppCompatActivity implements View.OnClickListener {
+    Button b;
     /***
      * Handler to allow other threads to touch the UI thread.
      */
@@ -33,7 +34,7 @@ public class register extends AppCompatActivity implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        Button b = (Button)findViewById(R.id.perform_registration);
+        b = (Button)findViewById(R.id.perform_registration);
         b.setOnClickListener(this);
         handler = new Handler();
     }
@@ -53,17 +54,18 @@ public class register extends AppCompatActivity implements View.OnClickListener 
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType, "email="+email+"&password="+password+"&firstName="+firstName+"&lastName="+lastName+"&userName="+userName);
         Request request = new Request.Builder()
-                .url("https://hidden-scrubland-70822.herokuapp.com/register")
+                .url("https://damp-anchorage-73052.herokuapp.com/register")
                 .post(body)
                 .addHeader("content-type", "application/x-www-form-urlencoded")
                 .addHeader("cache-control", "no-cache")
-                .addHeader("postman-token", "40f43f9d-e8b7-2cb6-8352-717662b9068c")
+                .addHeader("postman-token", "45412697-790a-95cf-e88e-e0b72fea4f6f")
                 .build();
         Response response = client.newCall(request).execute();
         final String[] details = response.body().string().split(",");
         handler.post(new Runnable(){
             @Override
             public void run(){
+                b.setEnabled(true);
                 if(details[0].contains("error")){
                     Toast.makeText(register.this,"Username or Email already taken!",Toast.LENGTH_LONG).show();
                 }else{
@@ -79,6 +81,7 @@ public class register extends AppCompatActivity implements View.OnClickListener 
      * @param view the button clicked.
      */
     public void onClick(View view){
+        b.setEnabled(false);
         final String email = ((EditText)findViewById(R.id.reg_email)).getText().toString().replace(" ","%40");
         final String password = ((EditText)findViewById(R.id.reg_password)).getText().toString().replace(" ","%40");
         final String firstName = ((EditText)findViewById(R.id.reg_firstName)).getText().toString().replace(" ","%40");

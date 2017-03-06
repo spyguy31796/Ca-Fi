@@ -159,10 +159,10 @@ public class MainMenu extends AppCompatActivity {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(cm)).build();
         Request request = new Request.Builder()
-                .url("https://hidden-scrubland-70822.herokuapp.com/logout")
+                .url("https://damp-anchorage-73052.herokuapp.com/logout")
                 .get()
                 .addHeader("cache-control", "no-cache")
-                .addHeader("postman-token", "c7ba7ef7-d585-9974-b57e-e0f3bdb8c6ac")
+                .addHeader("postman-token", "622d2a8c-16d4-41b9-d1df-135fadfc2fea")
                 .build();
         client.newCall(request).execute();
         handler.post(new Runnable(){

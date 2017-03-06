@@ -29,6 +29,7 @@ import okhttp3.Response;
  * @version Feb 10 2017
  */
 public class login extends AppCompatActivity implements View.OnClickListener {
+    Button b;
     /***
      * Handler to allow other threads to touch the UI thread.
      */
@@ -41,7 +42,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Button b = (Button)findViewById(R.id.perform_login);
+        b = (Button)findViewById(R.id.perform_login);
         b.setOnClickListener(this);
         handler = new Handler();
     }
@@ -59,11 +60,11 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType,"email="+login+"&password="+password);
         Request request = new Request.Builder()
-                .url("https://hidden-scrubland-70822.herokuapp.com/login")
+                .url("https://damp-anchorage-73052.herokuapp.com/login")
                 .post(body)
                 .addHeader("content-type", "application/x-www-form-urlencoded")
                 .addHeader("cache-control", "no-cache")
-                .addHeader("postman-token", "105de595-5532-1029-3f73-6ef2903a00d7")
+                .addHeader("postman-token", "6001af9e-af55-fdfa-6ffa-7dbb370b2ac3")
                 .build();
         final Response response = client.newCall(request).execute();
         Log.d("response",response.peekBody(Long.valueOf("100")).string());
@@ -72,6 +73,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         handler.post(new Runnable(){
             @Override
             public void run(){
+                b.setEnabled(true);
                 if(details[0].contains("Success")){
                     Intent i = new Intent(login.this,MainMenu.class);
                     startActivity(i);
@@ -89,6 +91,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
      * @param view the button clicked.
      */
     public void onClick(View view){
+        view.setEnabled(false);
         final String login = ((EditText)findViewById(R.id.username_field)).getText().toString().replace(" ","%40");
         final String password = ((EditText)findViewById(R.id.password_field)).getText().toString().replace(" ","%40");
         Thread thread = new Thread(new Runnable() {
