@@ -60,10 +60,11 @@ public class audio_player extends ListActivity {
     private ToggleButton repeatButton = null;
 
     private boolean isMusicPlaying = true;
-    private String currentFile = "";
+    private String currentFile = "Streaming Audio";
     private boolean isSeekbarMoving = false;
     private MediaSessionCompat ms;
     private notification nf;
+    private boolean fileSelected=false;
 
     private final Handler handler = new Handler();
 
@@ -134,7 +135,7 @@ public class audio_player extends ListActivity {
     @Override
     protected void onListItemClick(ListView list, View view, int position, long id) {
         super.onListItemClick(list, view, position, id);
-
+        fileSelected = true;
         currentFile = (String) view.getTag();
 
         startPlay(currentFile);
@@ -146,7 +147,7 @@ public class audio_player extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        nf.closeNotification();
         handler.removeCallbacks(updatePositionRunnable);
         mp.stop();
         mp.reset();
@@ -237,27 +238,11 @@ public class audio_player extends ListActivity {
                     break;
                 }
                 case R.id.fwdSeek: {
-                    int seekto = mp.getCurrentPosition() + STEP_VALUE;
-
-                    if (seekto > mp.getDuration())
-                        seekto = mp.getDuration();
-
-                    mp.pause();
-                    mp.seekTo(seekto);
-                    mp.start();
-
+                    SkipForwardHandler();
                     break;
                 }
                 case R.id.prevSeek: {
-                    int seekto = mp.getCurrentPosition() - STEP_VALUE;
-
-                    if (seekto < 0)
-                        seekto = 0;
-
-                    mp.pause();
-                    mp.seekTo(seekto);
-                    mp.start();
-
+                   SkipBackHandler();
                     break;
                 }
                 case R.id.repeat:
@@ -272,22 +257,49 @@ public class audio_player extends ListActivity {
     };
 
     private void PlayPauseHandler(){
+        fileSelected=false;
+        if(nf==null){
+            nf = new notification(getApplicationContext());
+        }
         if (mp.isPlaying()) {
             handler.removeCallbacks(updatePositionRunnable);
             mp.pause();
             playButton.setImageResource(android.R.drawable.ic_media_play);
             nf.closeNotification();
+            nf = new notification(getApplicationContext());
         } else {
             if (isMusicPlaying) {
                 mp.start();
                 playButton.setImageResource(android.R.drawable.ic_media_pause);
+                nf.closeNotification();
                 nf = new notification(getApplicationContext());
                 updatePosition();
             } else {
+                nf.closeNotification();
                 nf = new notification(getApplicationContext());
                 startPlay(currentFile);
             }
         }
+    }
+    private void SkipBackHandler(){
+        int seekto = mp.getCurrentPosition() - STEP_VALUE;
+
+        if (seekto < 0)
+            seekto = 0;
+
+        mp.pause();
+        mp.seekTo(seekto);
+        mp.start();
+    }
+    private void SkipForwardHandler(){
+        int seekto = mp.getCurrentPosition() + STEP_VALUE;
+
+        if (seekto > mp.getDuration())
+            seekto = mp.getDuration();
+
+        mp.pause();
+        mp.seekTo(seekto);
+        mp.start();
     }
     /**
      * An onCompletionListener obj to handle what happens when the media player completes playing
@@ -413,11 +425,21 @@ public class audio_player extends ListActivity {
             nb.setContentText(currentFile);
             nb.setContentIntent(PendingIntent.getActivity(parent, 0, new Intent(parent, audio_player.class), 0));
             nb.setOngoing(true);
+            Intent skipBack = new Intent(parent,audio_player.class);
+            skipBack.putExtra("Action","Back");
+            nb.addAction(android.R.drawable.ic_media_rew,"Back",PendingIntent.getActivity(parent,2,skipBack,0));
             Intent pauseIntent = new Intent(parent,audio_player.class);
             pauseIntent.putExtra("Action","Pause");
-            nb.addAction(android.R.drawable.ic_media_pause,"Pause",PendingIntent.getActivity(parent,1,pauseIntent,0));
+            if(!mp.isPlaying()&&!fileSelected) {
+                nb.addAction(android.R.drawable.ic_media_play, "Play", PendingIntent.getActivity(parent, 1, pauseIntent, 0));
+            }else{
+                nb.addAction(android.R.drawable.ic_media_pause, "Pause", PendingIntent.getActivity(parent, 1, pauseIntent, 0));
+            }
+            Intent skipForward = new Intent(parent,audio_player.class);
+            skipForward.putExtra("Action","Front");
+            nb.addAction(android.R.drawable.ic_media_ff,"Front",PendingIntent.getActivity(parent,3,skipForward,0));
             nb.setStyle(new NotificationCompat.MediaStyle()
-                    .setShowActionsInCompactView(0)
+                    .setShowActionsInCompactView(1)
                     .setMediaSession(ms.getSessionToken()));
             nb.setSmallIcon(android.R.drawable.ic_media_play);
             nm = (NotificationManager) parent.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -434,6 +456,12 @@ public class audio_player extends ListActivity {
             switch (intent.getStringExtra("Action")) {
                 case "Pause":
                     PlayPauseHandler();
+                    break;
+                case "Back":
+                    SkipBackHandler();
+                    break;
+                case "Front":
+                    SkipForwardHandler();
                     break;
                 default:
                     break;
