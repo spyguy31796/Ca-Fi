@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -73,18 +74,22 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .writeTimeout(20, TimeUnit.SECONDS)
+                    .build();
             MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
             RequestBody body = RequestBody.create(mediaType, "youtubeID="+idString);
             Request request = new Request.Builder()
-                    .url("https://hidden-scrubland-70822.herokuapp.com/stream_yt")
+                    .url("https://damp-anchorage-73052.herokuapp.com/stream_yt")
                     .post(body)
                     .addHeader("content-type", "application/x-www-form-urlencoded")
                     .addHeader("cache-control", "no-cache")
-                    .addHeader("postman-token", "68f30572-d738-00dd-0ffd-bdb134c10bae")
+                    .addHeader("postman-token", "4014accd-f315-a762-d57b-25613deb8758")
                     .build();
             Response response = client.newCall(request).execute();
-            final File file = new File(getCacheDir(),"cacheFileAppeal.sr1");
+            final File file = new File(getCacheDir(),"cache.dat");
             OutputStream out = new FileOutputStream(file);
             byte buffer[] = new byte[6*1024];
             int length;
