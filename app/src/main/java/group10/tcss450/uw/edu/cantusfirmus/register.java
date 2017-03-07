@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -50,7 +51,11 @@ public class register extends AppCompatActivity implements View.OnClickListener 
      * @throws IOException thrown if there is a network issue.
      */
     private void register(String email, String password, String firstName, String lastName, String userName)throws IOException{
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .build();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType, "email="+email+"&password="+password+"&firstName="+firstName+"&lastName="+lastName+"&userName="+userName);
         Request request = new Request.Builder()

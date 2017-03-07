@@ -19,6 +19,7 @@ import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
@@ -93,10 +94,14 @@ public class login extends AppCompatActivity implements View.OnClickListener {
      * and the cookie is also kept.
      * @param login the email to use in the login attempt.
      * @param password the password to use in the login attempt.
-     * @throws IOException In the event of an izssue with the server, an IOException may be generated.
+     * @throws IOException In the event of an issue with the server, an IOException may be generated.
      */
     private void login(String login, String password) throws IOException{
-        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(cm)).build();
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(cm))
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType,"email="+login+"&password="+password);
         Request request = new Request.Builder()
@@ -168,7 +173,12 @@ public class login extends AppCompatActivity implements View.OnClickListener {
     }
 
     private void test_Cookie() throws IOException{
-        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager())).build();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .cookieJar(new JavaNetCookieJar(login.getCookieManager()))
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
         //Log.d("What cookie to use",cm.getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/user_info")

@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -73,7 +74,11 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(20, TimeUnit.SECONDS)
+                    .writeTimeout(20, TimeUnit.SECONDS)
+                    .build();
             MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
             RequestBody body = RequestBody.create(mediaType, "youtubeID="+idString);
             Request request = new Request.Builder()

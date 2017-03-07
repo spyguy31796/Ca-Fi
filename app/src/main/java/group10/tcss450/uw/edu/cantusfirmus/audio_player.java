@@ -410,7 +410,7 @@ public class audio_player extends ListActivity {
 
         public notification(Context parent){
             nb = new NotificationCompat.Builder(parent);
-            nb.setContentText("CAFI MUSIC");
+            nb.setContentText(currentFile);
             nb.setContentIntent(PendingIntent.getActivity(parent, 0, new Intent(parent, audio_player.class), 0));
             nb.setOngoing(true);
             Intent pauseIntent = new Intent(parent,audio_player.class);
