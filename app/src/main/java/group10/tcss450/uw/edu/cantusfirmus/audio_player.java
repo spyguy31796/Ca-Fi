@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +57,7 @@ public class audio_player extends ListActivity {
     private ImageButton playButton = null;
     private ImageButton prevButton = null;
     private ImageButton nextButton = null;
+    private ToggleButton repeatButton = null;
 
     private boolean isMusicPlaying = true;
     private String currentFile = "";
@@ -82,6 +84,7 @@ public class audio_player extends ListActivity {
         playButton = (ImageButton) findViewById(R.id.playbtn);
         prevButton = (ImageButton) findViewById(R.id.prevSeek);
         nextButton = (ImageButton) findViewById(R.id.fwdSeek);
+        repeatButton = (ToggleButton) findViewById(R.id.repeat);
 
         mp = new MediaPlayer();
         mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -102,6 +105,7 @@ public class audio_player extends ListActivity {
                 playButton.setOnClickListener(onButtonClick);
                 nextButton.setOnClickListener(onButtonClick);
                 prevButton.setOnClickListener(onButtonClick);
+                repeatButton.setOnClickListener(onButtonClick);
             }
 
         }
@@ -229,23 +233,7 @@ public class audio_player extends ListActivity {
             }
             switch (v.getId()) {
                 case R.id.playbtn: {
-                    if (mp.isPlaying()) {
-                        handler.removeCallbacks(updatePositionRunnable);
-                        mp.pause();
-                        playButton.setImageResource(android.R.drawable.ic_media_play);
-                        nf.closeNotification();
-                    } else {
-                        if (isMusicPlaying) {
-                            mp.start();
-                            playButton.setImageResource(android.R.drawable.ic_media_pause);
-                            nf = new notification(getApplicationContext());
-                            updatePosition();
-                        } else {
-                            nf = new notification(getApplicationContext());
-                            startPlay(currentFile);
-                        }
-                    }
-
+                    PlayPauseHandler();
                     break;
                 }
                 case R.id.fwdSeek: {
@@ -272,10 +260,35 @@ public class audio_player extends ListActivity {
 
                     break;
                 }
+                case R.id.repeat:
+                    if(((ToggleButton)v).isChecked()){
+                        mp.setLooping(true);
+                    }else{
+                        mp.setLooping(false);
+                    }
+                    break;
             }
         }
     };
 
+    private void PlayPauseHandler(){
+        if (mp.isPlaying()) {
+            handler.removeCallbacks(updatePositionRunnable);
+            mp.pause();
+            playButton.setImageResource(android.R.drawable.ic_media_play);
+            nf.closeNotification();
+        } else {
+            if (isMusicPlaying) {
+                mp.start();
+                playButton.setImageResource(android.R.drawable.ic_media_pause);
+                nf = new notification(getApplicationContext());
+                updatePosition();
+            } else {
+                nf = new notification(getApplicationContext());
+                startPlay(currentFile);
+            }
+        }
+    }
     /**
      * An onCompletionListener obj to handle what happens when the media player completes playing
      * music or is stopped.
@@ -400,7 +413,11 @@ public class audio_player extends ListActivity {
             nb.setContentText("CAFI MUSIC");
             nb.setContentIntent(PendingIntent.getActivity(parent, 0, new Intent(parent, audio_player.class), 0));
             nb.setOngoing(true);
+            Intent pauseIntent = new Intent(parent,audio_player.class);
+            pauseIntent.putExtra("Action","Pause");
+            nb.addAction(android.R.drawable.ic_media_pause,"Pause",PendingIntent.getActivity(parent,1,pauseIntent,0));
             nb.setStyle(new NotificationCompat.MediaStyle()
+                    .setShowActionsInCompactView(0)
                     .setMediaSession(ms.getSessionToken()));
             nb.setSmallIcon(android.R.drawable.ic_media_play);
             nm = (NotificationManager) parent.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -413,5 +430,14 @@ public class audio_player extends ListActivity {
     @Override
     protected void onNewIntent (Intent intent) {
         //Need code for handling buttons from notifications
+        if(intent.hasExtra("Action")) {
+            switch (intent.getStringExtra("Action")) {
+                case "Pause":
+                    PlayPauseHandler();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
