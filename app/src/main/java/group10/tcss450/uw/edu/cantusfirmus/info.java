@@ -11,6 +11,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.HttpCookie;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
@@ -66,8 +67,12 @@ public class info extends AppCompatActivity {
      * @throws IOException Thrown if there is a issue with the server.
      */
     private void get_info() throws IOException{
-        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager())).build();
-        Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager()))
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .build();
+        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/user_info")
                 .get()

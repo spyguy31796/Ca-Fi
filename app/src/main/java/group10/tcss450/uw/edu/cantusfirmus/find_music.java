@@ -1,9 +1,13 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.support.v4.graphics.BitmapCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +44,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
      * Handler allowing other threads to touch the UI thread.
      */
     private Handler handler;
+    private static Bitmap bc = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,12 +74,23 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         search.setKey(apiKey);
         search.setQ(query);
         search.setType("music");
-        search.setFields("items(id/videoId)");
+        search.setFields("items(id/videoId,snippet/thumbnails/default/url)");
         search.setMaxResults((long)1);
         SearchListResponse searchResponse = search.execute();
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
+            final String pictureString = searchResultList.get(0)
+                    .get("snippet").toString().split(":")[3].replace("\"","").replace("}","")
+                    +":"
+                    +searchResultList.get(0).get("snippet").toString().split(":")[4].replace("\"","").replace("}","");
+            //Log.d("thumbnail",pictureString);
+            try{
+                URL url = new URL(pictureString);
+                bc = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+            }catch(Exception e){
+                e.printStackTrace();
+            }
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(20, TimeUnit.SECONDS)
@@ -153,5 +170,11 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
             }
         });
         thread.start();
+    }
+    public static Bitmap getIcon(){
+        return bc;
+    }
+    public static void setIcon(Bitmap bit){
+        bc = bit;
     }
 }

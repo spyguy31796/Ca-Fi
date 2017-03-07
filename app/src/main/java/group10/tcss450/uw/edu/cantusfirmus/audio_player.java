@@ -113,9 +113,10 @@ public class audio_player extends ListActivity {
         Intent i = getIntent();
         Bundle b = i.getExtras();
         try{
+            fileSelected = true;
             String url = b.getString("web");
             i.removeExtra("web");
-            Log.d("url",url);
+            //Log.d("url",url);
             startPlay(url);
             //startPlay(networkAudio.body().byteStream());
         }catch(Exception ex){
@@ -137,7 +138,7 @@ public class audio_player extends ListActivity {
         super.onListItemClick(list, view, position, id);
         fileSelected = true;
         currentFile = (String) view.getTag();
-
+        find_music.setIcon(null);
         startPlay(currentFile);
     }
 
@@ -423,6 +424,9 @@ public class audio_player extends ListActivity {
         public notification(Context parent){
             nb = new NotificationCompat.Builder(parent);
             nb.setContentText(currentFile);
+            if(find_music.getIcon()!=null){
+                nb.setLargeIcon(find_music.getIcon());
+            }
             nb.setContentIntent(PendingIntent.getActivity(parent, 0, new Intent(parent, audio_player.class), 0));
             nb.setOngoing(true);
             Intent skipBack = new Intent(parent,audio_player.class);
