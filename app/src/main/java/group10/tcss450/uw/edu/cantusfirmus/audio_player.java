@@ -1,6 +1,8 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.app.ListActivity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,16 +10,21 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.provider.MediaStore;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -53,6 +60,8 @@ public class audio_player extends ListActivity {
     private boolean isMusicPlaying = true;
     private String currentFile = "";
     private boolean isSeekbarMoving = false;
+    private MediaSessionCompat ms;
+    private notification nf;
 
     private final Handler handler = new Handler();
 
@@ -67,7 +76,7 @@ public class audio_player extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audio_player);
-
+        ms = new MediaSessionCompat(this,"Music");
         selelctedFile = (TextView) findViewById(R.id.selectedFile);
         mySeekbar = (SeekBar) findViewById(R.id.songSeekbar);
         playButton = (ImageButton) findViewById(R.id.playbtn);
@@ -75,11 +84,10 @@ public class audio_player extends ListActivity {
         nextButton = (ImageButton) findViewById(R.id.fwdSeek);
 
         mp = new MediaPlayer();
-
+        mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mp.setOnCompletionListener(onCompletionListener);
         mp.setOnErrorListener(onErrorListener);
         mySeekbar.setOnSeekBarChangeListener(seekBarChangedListener);
-
         if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             Log.v(TAG, "Permission has been granted for thee who wish to ROCK AND ROLL");
             //File write logic here
@@ -148,6 +156,7 @@ public class audio_player extends ListActivity {
      * @param file a file to be used for playing audio
      */
     private void startPlay(String file) {
+        nf = new notification(getApplicationContext());
         Log.i("Selected: ", file);
         selelctedFile.setText(file);
         mySeekbar.setProgress(0);
@@ -157,34 +166,6 @@ public class audio_player extends ListActivity {
 
         try {
             mp.setDataSource(file);
-            mp.prepare();
-            mp.start();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        mySeekbar.setMax(mp.getDuration());
-        playButton.setImageResource(android.R.drawable.ic_media_pause);
-
-        updatePosition();
-
-        isMusicPlaying = true;
-    }
-    private void startPlay(FileInputStream fid) throws IOException{
-        //Log.i("Selected: ", file);
-        //selelctedFile.setText(file);
-        Log.d("FID",fid.getFD().toString());
-        mySeekbar.setProgress(0);
-
-        mp.stop();
-        mp.reset();
-
-        try {
-            mp.setDataSource(fid.getFD());
             mp.prepare();
             mp.start();
         } catch (IllegalArgumentException e) {
@@ -243,19 +224,24 @@ public class audio_player extends ListActivity {
          */
         @Override
         public void onClick(View v) {
+            if(nf==null){
+                nf = new notification(getApplicationContext());
+            }
             switch (v.getId()) {
                 case R.id.playbtn: {
                     if (mp.isPlaying()) {
                         handler.removeCallbacks(updatePositionRunnable);
                         mp.pause();
                         playButton.setImageResource(android.R.drawable.ic_media_play);
+                        nf.closeNotification();
                     } else {
                         if (isMusicPlaying) {
                             mp.start();
                             playButton.setImageResource(android.R.drawable.ic_media_pause);
-
+                            nf = new notification(getApplicationContext());
                             updatePosition();
                         } else {
+                            nf = new notification(getApplicationContext());
                             startPlay(currentFile);
                         }
                     }
@@ -404,5 +390,28 @@ public class audio_player extends ListActivity {
 
             return v;
         }
+    }
+    private class notification {
+        private NotificationManager nm;
+        private NotificationCompat.Builder nb;
+
+        public notification(Context parent){
+            nb = new NotificationCompat.Builder(parent);
+            nb.setContentText("CAFI MUSIC");
+            nb.setContentIntent(PendingIntent.getActivity(parent, 0, new Intent(parent, audio_player.class), 0));
+            nb.setOngoing(true);
+            nb.setStyle(new NotificationCompat.MediaStyle()
+                    .setMediaSession(ms.getSessionToken()));
+            nb.setSmallIcon(android.R.drawable.ic_media_play);
+            nm = (NotificationManager) parent.getSystemService(Context.NOTIFICATION_SERVICE);
+            nm.notify(2, nb.build());
+        }
+        public void closeNotification(){
+            nm.cancel(2);
+        }
+    }
+    @Override
+    protected void onNewIntent (Intent intent) {
+        //Need code for handling buttons from notifications
     }
 }

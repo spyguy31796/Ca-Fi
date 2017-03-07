@@ -114,7 +114,11 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         //Log.d("Cookies",cm.getCookieStore().getCookies().get(0).getDomain());
         //Log.d("Cookies",cm.getCookieStore().getCookies().get(0).getCommentURL());
         //Log.d("headers",response.headers().get("Set-Cookie"));
-        mPrefs.edit().putString("session",cm.getCookieStore().getCookies().get(cm.getCookieStore().getCookies().size()-1).getValue()).apply();
+        if(cm.getCookieStore().getCookies().size()!=0) {
+            mPrefs.edit().putString("session", cm.getCookieStore().getCookies().get(cm.getCookieStore().getCookies().size() - 1).getValue()).apply();
+        }else{
+            mPrefs.edit().putString("session", cm.getCookieStore().getCookies().get(0).getValue()).apply();
+        }
         handler.post(new Runnable(){
             @Override
             public void run(){
@@ -172,10 +176,10 @@ public class login extends AppCompatActivity implements View.OnClickListener {
                 .addHeader("cache-control", "no-cache")
                 .addHeader("postman-token", "536e387f-52c2-946a-fdac-79006118dbc8")
                 .build();
-        Log.d("Request",request.toString());
+        //Log.d("Request",request.toString());
         Response response = client.newCall(request).execute();
         final String[] details = response.body().string().split(",");
-        Log.d("LOOKLISTEN",details[0]);
+        //Log.d("LOOKLISTEN",details[0]);
         handler.post(new Runnable(){
             @Override
             public void run(){
