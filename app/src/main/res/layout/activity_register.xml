@@ -58,6 +58,7 @@
         android:paddingBottom="5dp"
         android:background="@drawable/text_background"
         android:id="@+id/reg_password"
+        android:inputType="textPassword"
         android:hint="@string/password_lbll"/>
     <EditText
         android:layout_width="match_parent"
@@ -67,6 +68,7 @@
         android:paddingBottom="5dp"
         android:background="@drawable/text_background"
         android:id="@+id/reg_confirmPass"
+        android:inputType="textPassword"
         android:hint="@string/confirm_password_lbl"/>
     <Button
         android:layout_width="match_parent"
