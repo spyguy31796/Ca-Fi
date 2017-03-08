@@ -148,7 +148,9 @@ public class audio_player extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        nf.closeNotification();
+        if(nf!=null) {
+            nf.closeNotification();
+        }
         handler.removeCallbacks(updatePositionRunnable);
         mp.stop();
         mp.reset();
