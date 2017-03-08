@@ -69,7 +69,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
 
             }
         }).setApplicationName("youtube-search").build();
-        String query = (((EditText)(findViewById(R.id.searchField))).getText().toString());
+        final String query = (((EditText)(findViewById(R.id.searchField))).getText().toString());
         YouTube.Search.List search = youTube.search().list("id,snippet");
         search.setKey(apiKey);
         search.setQ(query);
@@ -132,6 +132,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    Intent intent = new Intent(find_music.this,audio_player.class);
                    Bundle b = new Bundle();
                    b.putString("web",file.getAbsolutePath());
+                   b.putString("name",query);
                    intent.putExtras(b);
                    findViewById(R.id.search_btn).setEnabled(true);
                    findViewById(R.id.progress).setVisibility(View.GONE);
