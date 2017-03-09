@@ -115,7 +115,9 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         //Log.d("RequestLogin",request.headers().toString());
         //Log.d("response",response.peekBody(Long.valueOf("100")).string());
         final String[] details = response.body().string().split(",");
+
         if(cm.getCookieStore().getCookies().size()>0) {
+
             mPrefs.edit().putString("session", cm.getCookieStore().getCookies().get(cm.getCookieStore().getCookies().size() - 1).getValue()).apply();
         }
         handler.post(new Runnable(){

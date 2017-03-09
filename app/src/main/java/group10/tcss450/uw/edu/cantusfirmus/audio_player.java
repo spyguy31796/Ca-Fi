@@ -410,10 +410,8 @@ public class audio_player extends ListActivity {
 
             double durationInMin = ((double) durationInMs / 1000.0) / 60.0;
 
-            durationInMin = new BigDecimal(Double.toString(durationInMin)).setScale(3, BigDecimal.ROUND_UP).doubleValue();
-
+            durationInMin = new BigDecimal(Double.toString(durationInMin)).setScale(2, BigDecimal.ROUND_UP).doubleValue();
             duration.setText("" + durationInMin);
-
             view.setTag(cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA)));
         }
 

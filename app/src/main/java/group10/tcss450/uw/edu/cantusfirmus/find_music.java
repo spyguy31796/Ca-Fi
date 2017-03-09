@@ -1,8 +1,12 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
+import android.content.Context;
 import android.content.Intent;
+
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import android.os.Handler;
 import android.support.v4.graphics.BitmapCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +37,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+
 
 /***
  * This activity is where music not in the local library can be searched for. Currently it only supports youtube.
@@ -106,8 +112,12 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                     .addHeader("postman-token", "4014accd-f315-a762-d57b-25613deb8758")
                     .build();
             Response response = client.newCall(request).execute();
+
             final File file = new File(getCacheDir(),"cache.dat");
+
             OutputStream out = new FileOutputStream(file);
+
+
             byte buffer[] = new byte[6*1024];
             int length;
             while((length = response.body().byteStream().read(buffer))!=-1){
@@ -131,8 +141,10 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    //Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
                    Intent intent = new Intent(find_music.this,audio_player.class);
                    Bundle b = new Bundle();
+
                    b.putString("web",file.getAbsolutePath());
                    b.putString("name",query);
+
                    intent.putExtras(b);
                    findViewById(R.id.search_btn).setEnabled(true);
                    findViewById(R.id.progress).setVisibility(View.GONE);
