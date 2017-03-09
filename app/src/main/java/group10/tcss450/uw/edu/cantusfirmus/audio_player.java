@@ -5,8 +5,10 @@ import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -212,13 +214,18 @@ public class audio_player extends ListActivity {
      * This method handles what happens when stop playing music in the audio_player.
      */
     private void stopPlay() {
-        mp.stop();
-        mp.reset();
-        playButton.setImageResource(android.R.drawable.ic_media_play);
-        handler.removeCallbacks(updatePositionRunnable);
+        if(!mp.isLooping()) {
+            if(nf!=null){
+                nf.closeNotification();
+                nf = new notification(this);
+            }
+            mp.stop();
+            mp.reset();
+            playButton.setImageResource(android.R.drawable.ic_media_play);
+            handler.removeCallbacks(updatePositionRunnable);
+            isMusicPlaying = false;
+        }
         mySeekbar.setProgress(0);
-
-        isMusicPlaying = false;
     }
 
     /**
