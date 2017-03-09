@@ -21,6 +21,7 @@
         <activity android:name=".audio_player"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"/>
+        <service android:name=".audio_player$notificationRemover"></service>
         <activity android:name=".find_music" />
         <activity android:name=".MainMenu" />
         <activity android:name=".login" />

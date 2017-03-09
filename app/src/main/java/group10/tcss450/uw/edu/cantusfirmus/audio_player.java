@@ -1,17 +1,24 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
+import android.app.IntentService;
 import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 
@@ -39,6 +46,7 @@ import java.math.BigDecimal;
 import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 /**
  * This class holds the audio player and the components that make up the audio player activity.
@@ -86,7 +94,7 @@ public class audio_player extends ListActivity {
         prevButton = (ImageButton) findViewById(R.id.prevSeek);
         nextButton = (ImageButton) findViewById(R.id.fwdSeek);
         repeatButton = (ToggleButton) findViewById(R.id.repeat);
-
+        startService(new Intent(this,notificationRemover.class));
         mp = new MediaPlayer();
         mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mp.setOnCompletionListener(onCompletionListener);
@@ -113,10 +121,18 @@ public class audio_player extends ListActivity {
         Intent i = getIntent();
         Bundle b = i.getExtras();
         try{
+            fileSelected = true;
             String url = b.getString("web");
             i.removeExtra("web");
-            Log.d("url",url);
-            startPlay(url);
+            String title = b.getString("name");
+            i.removeExtra("name");
+            if(title!=null){
+                currentFile = title;
+            }
+            //Log.d("url",url);
+            if(url!=null) {
+                startPlay(url);
+            }
             //startPlay(networkAudio.body().byteStream());
         }catch(Exception ex){
             //Log.d("Exception",ex.getMessage());
@@ -137,7 +153,7 @@ public class audio_player extends ListActivity {
         super.onListItemClick(list, view, position, id);
         fileSelected = true;
         currentFile = (String) view.getTag();
-
+        find_music.setIcon(null);
         startPlay(currentFile);
     }
 
@@ -147,7 +163,9 @@ public class audio_player extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        nf.closeNotification();
+        if(nf!=null) {
+            nf.closeNotification();
+        }
         handler.removeCallbacks(updatePositionRunnable);
         mp.stop();
         mp.reset();
@@ -414,6 +432,35 @@ public class audio_player extends ListActivity {
             return v;
         }
     }
+
+    /***
+     * Service That Removes Notification if the App is Force Closed.
+     */
+    public static class notificationRemover extends Service {
+        public notificationRemover() {
+            super();
+        }
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId){
+           return START_STICKY;
+        }
+        @Override
+        public void onCreate(){
+            HandlerThread thread = new HandlerThread("ServiceStartArguments",
+                THREAD_PRIORITY_BACKGROUND);
+            thread.start();
+        }
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+        @Override
+        public void onTaskRemoved(Intent rootIntent) {
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.cancel(2);
+            stopSelf();
+        }
+    }
     private class notification {
         private NotificationManager nm;
         private NotificationCompat.Builder nb;
@@ -421,6 +468,9 @@ public class audio_player extends ListActivity {
         public notification(Context parent){
             nb = new NotificationCompat.Builder(parent);
             nb.setContentText(currentFile);
+            if(find_music.getIcon()!=null){
+                nb.setLargeIcon(find_music.getIcon());
+            }
             nb.setContentIntent(PendingIntent.getActivity(parent, 0, new Intent(parent, audio_player.class), 0));
             nb.setOngoing(true);
             Intent skipBack = new Intent(parent,audio_player.class);
@@ -449,7 +499,6 @@ public class audio_player extends ListActivity {
     }
     @Override
     protected void onNewIntent (Intent intent) {
-        //Need code for handling buttons from notifications
         if(intent.hasExtra("Action")) {
             switch (intent.getStringExtra("Action")) {
                 case "Pause":
