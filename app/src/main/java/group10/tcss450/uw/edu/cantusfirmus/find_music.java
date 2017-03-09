@@ -3,6 +3,7 @@ package group10.tcss450.uw.edu.cantusfirmus;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.graphics.BitmapCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -80,6 +81,7 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
+            Log.d("idString", idString);
             final String pictureString = searchResultList.get(0)
                     .get("snippet").toString().split(":")[3].replace("\"","").replace("}","")
                     +":"
@@ -106,7 +108,9 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                     .addHeader("postman-token", "4014accd-f315-a762-d57b-25613deb8758")
                     .build();
             Response response = client.newCall(request).execute();
-            final File file = new File(getCacheDir(),"cache.dat");
+            final File file = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_MUSIC), "temp.mp3");
+            //final File file = new File(getFilesDir(),"cache.dat");
             OutputStream out = new FileOutputStream(file);
             byte buffer[] = new byte[6*1024];
             int length;
