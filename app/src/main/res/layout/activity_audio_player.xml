@@ -47,28 +47,38 @@
 
             <ImageButton
                 android:id="@+id/prevSeek"
+                android:background="@color/colorAccent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_media_previous"/>
             <ImageButton
                 android:id="@+id/playbtn"
+                android:background="@color/colorAccent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_media_play"/>
             <ImageButton
                 android:id="@+id/fwdSeek"
+                android:background="@color/colorAccent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_media_next"/>
+
             <ToggleButton
                 android:id="@+id/repeat"
                 android:text = ""
                 android:layout_width="55dp"
                 android:layout_height="wrap_content"
-                android:background="@android:drawable/ic_menu_revert"
+                android:background="@android:drawable/ic_popup_sync"
                 android:checked="false" />
 
-
+            <ImageButton
+                android:id="@+id/addToLibrary"
+                android:background="@color/colorAccent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_input_add"
+                android:visibility="invisible"/>
         </LinearLayout>
 
     </LinearLayout>

@@ -1,12 +1,13 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.Intent;
 
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.graphics.BitmapCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -65,8 +66,9 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
      * Then the video id is passed to our server where the video is processed and the mp3 is sent back in a response. The mp3 is saved in the
      * cache and transitioned to the music player where it is played.
      * @throws IOException If there is a server issues, an IOException can be thrown.
+     * @param progressDialog
      */
-    public void YTsearch() throws IOException {
+    public void YTsearch(final ProgressDialog progressDialog) throws IOException {
         YouTube youTube;
         //Needs to be removed from the source code.
         String apiKey = "AIzaSyBktpICzt4gZSd08s44i1UmbsQBKoxEXDE";
@@ -86,11 +88,12 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
+            Log.d("idString", idString);
             final String pictureString = searchResultList.get(0)
                     .get("snippet").toString().split(":")[3].replace("\"","").replace("}","")
                     +":"
                     +searchResultList.get(0).get("snippet").toString().split(":")[4].replace("\"","").replace("}","");
-            //Log.d("thumbnail",pictureString);
+            Log.d("thumbnail",pictureString);
             try{
                 URL url = new URL(pictureString);
                 bc = BitmapFactory.decodeStream(url.openConnection().getInputStream());
@@ -114,7 +117,6 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
             Response response = client.newCall(request).execute();
 
             final File file = new File(getCacheDir(),"cache.dat");
-
             OutputStream out = new FileOutputStream(file);
 
 
@@ -139,15 +141,17 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    //ClipData clip = ClipData.newPlainText("web-address",urlString);
                    //clipboard.setPrimaryClip(clip);
                    //Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
+                   progressDialog.dismiss();
                    Intent intent = new Intent(find_music.this,audio_player.class);
                    Bundle b = new Bundle();
 
                    b.putString("web",file.getAbsolutePath());
-                   b.putString("name",query);
+                   b.putString("youtubeId", idString);
+                   b.putString("imgurl" , pictureString);
+                   b.putString("title", query);
 
                    intent.putExtras(b);
                    findViewById(R.id.search_btn).setEnabled(true);
-                   findViewById(R.id.progress).setVisibility(View.GONE);
                    startActivity(intent);
                    //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -171,12 +175,15 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onClick(final View v) {
         v.setEnabled(false);
-        findViewById(R.id.progress).setVisibility(View.VISIBLE);
+        final ProgressDialog progressDialog = new ProgressDialog(find_music.this);
+        progressDialog.setTitle("Loading search");
+        progressDialog.setMessage("Loading your song...");
+        progressDialog.show();
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    YTsearch();
+                    YTsearch(progressDialog);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

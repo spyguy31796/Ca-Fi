@@ -31,6 +31,11 @@
         android:layout_height="wrap_content"
         android:id="@+id/UserInfoBtn"
         android:text="@string/user_info_lbl"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/UserPlayList"
+        android:text="User Playlist"/>
 
     </LinearLayout>
 

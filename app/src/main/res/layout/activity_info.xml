@@ -11,7 +11,6 @@
     tools:context="group10.tcss450.uw.edu.cantusfirmus.info">
 
     <TextView
-        android:text="@string/getting_info_lbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -20,7 +19,6 @@
         android:layout_alignParentEnd="true" />
 
     <TextView
-        android:text="@string/getting_info_lbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/info_firstName"
@@ -29,7 +27,6 @@
         android:layout_alignParentEnd="true" />
 
     <TextView
-        android:text="@string/getting_info_lbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/info_lastName"
@@ -38,7 +35,6 @@
         android:layout_alignParentEnd="true" />
 
     <TextView
-        android:text="@string/getting_info_lbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/info_userName"

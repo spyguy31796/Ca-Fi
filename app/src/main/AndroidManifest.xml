@@ -3,7 +3,8 @@
     package="group10.tcss450.uw.edu.cantusfirmus">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -18,7 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".audio_player"
+        <activity
+            android:name=".audio_player"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTask"/>
         <service android:name=".audio_player$notificationRemover"/>
@@ -26,7 +28,17 @@
         <activity android:name=".MainMenu" />
         <activity android:name=".login" />
         <activity android:name=".register" />
-        <activity android:name=".info"/>
+        <activity android:name=".info" />
+        <activity android:name=".playlist" />
+        <!--
+ ATTENTION: This was auto-generated to add Google Play services to your project for
+     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity android:name=".playlistsongs"></activity>
     </application>
 
 </manifest>

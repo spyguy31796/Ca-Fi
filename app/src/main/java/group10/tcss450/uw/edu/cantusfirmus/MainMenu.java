@@ -66,6 +66,13 @@ public class MainMenu extends AppCompatActivity {
                 userInfo();
             }
         });
+        Button userPlaylistBtn = (Button) findViewById(R.id.UserPlayList);
+        userPlaylistBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                userPlaylist();
+            }
+        });
     }
 
     /***
@@ -120,6 +127,11 @@ public class MainMenu extends AppCompatActivity {
      */
     private void userInfo() {
         Intent intent = new Intent(this, info.class);
+        startActivity(intent);
+    }
+
+    private void userPlaylist() {
+        Intent intent = new Intent(this, playlist.class);
         startActivity(intent);
     }
 
