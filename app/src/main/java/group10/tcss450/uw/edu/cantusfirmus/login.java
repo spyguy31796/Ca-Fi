@@ -119,6 +119,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         //Log.d("Cookies",cm.getCookieStore().getCookies().get(0).getDomain());
         //Log.d("Cookies",cm.getCookieStore().getCookies().get(0).getCommentURL());
         //Log.d("headers",response.headers().get("Set-Cookie"));
+        //Invalid login bug
         if(cm.getCookieStore().getCookies().size()!=0) {
             mPrefs.edit().putString("session", cm.getCookieStore().getCookies().get(cm.getCookieStore().getCookies().size() - 1).getValue()).apply();
         }else{

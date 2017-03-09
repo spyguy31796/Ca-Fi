@@ -10,13 +10,14 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     tools:context="group10.tcss450.uw.edu.cantusfirmus.audio_player"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:background="@color/uwMetallicGold">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:drawable/screen_background_light"
+        android:background="@android:drawable/screen_background_dark_transparent"
         android:orientation="vertical"
         android:padding="10dip">
 
@@ -28,7 +29,7 @@
             android:gravity="center_horizontal"
             android:maxLines="1"
             android:text="@string/selected_file_default_text"
-            android:textColor="@android:color/black"/>
+            android:textColor="@color/uwPurple"/>
 
         <SeekBar
             android:id="@+id/songSeekbar"
@@ -40,7 +41,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:drawable/screen_background_light"
+            android:background="@android:drawable/screen_background_dark_transparent"
             android:gravity="center"
             android:orientation="horizontal">
 

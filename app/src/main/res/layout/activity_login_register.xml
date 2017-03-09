@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_login_register"
     android:layout_width="match_parent"
@@ -9,38 +10,63 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="group10.tcss450.uw.edu.cantusfirmus.login_register">
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/title"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/titleCard"
-        android:textSize="48sp" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/titleCard"
         android:text="@string/tagLine"
-        android:id="@+id/tagLine"/>
-    <TextView
-        android:layout_below="@id/tagLine"
-        android:layout_width="50dp"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/blankSpace"
-        android:layout_height="50dp" />
-    <Button
+        android:id="@+id/tagLine"
+        android:fontFamily="casual"
+        android:textSize="30sp"
+        android:textStyle="normal|bold"
+        android:textAlignment="center"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:paddingEnd="0dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/blankSpace"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tagLine">
+
+        <ImageView
+            app:srcCompat="@mipmap/ic_launcher"
+            android:id="@+id/logo"
+            android:adjustViewBounds="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="346dp"
+            android:layout_height="278dp"
+            android:layout_below="@+id/tagLine"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="0dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/main_menu_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="66dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+
+            android:id="@+id/register_btn"
+            android:text="@string/register_lbl"/>
+
+        <Button
+        android:layout_width="114dp"
+        android:layout_height="61dp"
         android:id="@+id/login_btn"
-        android:text="@string/login_lbl"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/login_btn"
-        android:id="@+id/register_btn"
-        android:text="@string/register_lbl"/>
+        android:text="@string/login_lbl" />
+
+    </LinearLayout>
+
 </RelativeLayout>
