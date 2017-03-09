@@ -1,33 +1,51 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
+import android.app.IntentService;
 import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,10 +53,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.JavaNetCookieJar;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static group10.tcss450.uw.edu.cantusfirmus.R.id.playlist_name;
 
 /**
  * This class holds the audio player and the components that make up the audio player activity.
@@ -54,10 +80,18 @@ public class audio_player extends ListActivity {
     private TextView selelctedFile = null;
     private SeekBar mySeekbar = null;
     private MediaPlayer mp = null;
+    private String youtubeId = "";
+    private String imgurl = "";
+    private String myTitle = "";
     private ImageButton playButton = null;
     private ImageButton prevButton = null;
     private ImageButton nextButton = null;
+    private ImageButton addToLibraryButton = null;
     private ToggleButton repeatButton = null;
+    private audio_player myClass = this;
+    private String[] playlists;
+    private String addPlaylistSong;
+    private String selectedPlaylist;
 
     private boolean isMusicPlaying = true;
     private String currentFile = "Streaming Audio";
@@ -86,7 +120,8 @@ public class audio_player extends ListActivity {
         prevButton = (ImageButton) findViewById(R.id.prevSeek);
         nextButton = (ImageButton) findViewById(R.id.fwdSeek);
         repeatButton = (ToggleButton) findViewById(R.id.repeat);
-
+        addToLibraryButton = (ImageButton) findViewById(R.id.addToLibrary);
+        startService(new Intent(this,notificationRemover.class));
         mp = new MediaPlayer();
         mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mp.setOnCompletionListener(onCompletionListener);
@@ -107,6 +142,7 @@ public class audio_player extends ListActivity {
                 nextButton.setOnClickListener(onButtonClick);
                 prevButton.setOnClickListener(onButtonClick);
                 repeatButton.setOnClickListener(onButtonClick);
+                addToLibraryButton.setOnClickListener(onButtonClick);
             }
 
         }
@@ -116,13 +152,45 @@ public class audio_player extends ListActivity {
             fileSelected = true;
             String url = b.getString("web");
             i.removeExtra("web");
+            String title = b.getString("name");
+            i.removeExtra("name");
+            String youtube = b.getString("youtubeId");
+            i.removeExtra("youtubeId");
+            String img = b.getString("imgurl");
+            i.removeExtra("imgurl");
+            String songTitle = b.getString("title");
+            i.removeExtra("title");
+            if(title!=null){
+                currentFile = title;
+            }
             //Log.d("url",url);
-            startPlay(url);
+            if(url!=null) {
+                startPlay(url);
+            }
+            if (youtube!=null) {
+                youtubeId = youtube;
+                imgurl = img;
+                myTitle = songTitle;
+                addToLibraryButton.setVisibility(View.VISIBLE);
+            }
             //startPlay(networkAudio.body().byteStream());
         }catch(Exception ex){
             //Log.d("Exception",ex.getMessage());
             ex.printStackTrace();
         }
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getUserPlaylists();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 
 
@@ -136,6 +204,7 @@ public class audio_player extends ListActivity {
     @Override
     protected void onListItemClick(ListView list, View view, int position, long id) {
         super.onListItemClick(list, view, position, id);
+        addToLibraryButton.setVisibility(View.INVISIBLE);
         fileSelected = true;
         currentFile = (String) view.getTag();
         find_music.setIcon(null);
@@ -148,7 +217,9 @@ public class audio_player extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        nf.closeNotification();
+        if (nf!=null) {
+            nf.closeNotification();
+        }
         handler.removeCallbacks(updatePositionRunnable);
         mp.stop();
         mp.reset();
@@ -253,9 +324,213 @@ public class audio_player extends ListActivity {
                         mp.setLooping(false);
                     }
                     break;
+                case R.id.addToLibrary:
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(audio_player.this);
+                    View mView = getLayoutInflater().inflate(R.layout.dialog_add_to_playlist, null);
+                    final Spinner spinner = (Spinner) mView.findViewById(R.id.playlist_spinner);
+                    //String text = spinner.getSelectedItem().toString();
+                    spinner.setAdapter(new ArrayAdapter<String>(myClass,
+                            android.R.layout.simple_spinner_dropdown_item, playlists));
+                    Button mAddPlaylist = (Button) mView.findViewById(R.id.add_song_to_playlist);
+                    mBuilder.setView(mView);
+                    final AlertDialog dialog = mBuilder.create();
+                    dialog.show();
+                    mAddPlaylist.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                            selectedPlaylist = spinner.getSelectedItem().toString();
+                            if(selectedPlaylist.isEmpty()) {
+                                Toast.makeText(audio_player.this, "Please Create A Playlist", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Thread thread = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            addSongToLibrary();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                thread.start();
+                            }
+                        }
+                    });
+                    break;
             }
         }
     };
+
+    private void getUserPlaylists() throws IOException, JSONException {
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager()))
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .build();
+        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
+        Request request = new Request.Builder()
+                .url("https://damp-anchorage-73052.herokuapp.com/userPlaylists")
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .build();
+        Response response = client.newCall(request).execute();
+        String jsonData = response.body().string();
+        if (!jsonData.startsWith("{")) {
+            jsonData = "{playlists:" + jsonData + "}";
+            Log.d("JSON DATA", jsonData);
+            JSONObject temp = new JSONObject(jsonData);
+            final JSONArray jsonArray = temp.getJSONArray("playlists");
+            int playlist_number = jsonArray.length();
+            playlists = new String[playlist_number];
+            handler.post(new Runnable(){
+                @Override
+                public void run(){
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String playlist_name = null;
+                        try {
+
+                            playlist_name = jsonArray.getJSONObject(i).getString("name");
+                            Log.d("playlistName", playlist_name);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        playlists[i] = playlist_name;
+                    }
+                }
+            });
+        }
+    }
+
+    private void addSongToLibrary() throws IOException, JSONException {
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar((new JavaNetCookieJar(login.getCookieManager())))
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
+        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+        RequestBody body = RequestBody.create(mediaType, "id="+myTitle+"&imgurl="+imgurl+"&src="+youtubeId+"&title="+myTitle);
+        Request request = new Request.Builder()
+                .url("https://damp-anchorage-73052.herokuapp.com/addToLibrary")
+                .post(body)
+                .addHeader("content-type", "application/x-www-form-urlencoded")
+                .addHeader("cache-control", "no-cache")
+                .build();
+        final Response response = client.newCall(request).execute();
+        final String jsonData = response.body().string();
+        //Log.d("add playlist message", jsonData);
+        handler.post(new Runnable(){
+            @Override
+            public void run(){
+                if(jsonData.contains("error")) {
+                    Toast.makeText(audio_player.this,"Cannot be added to the database library",Toast.LENGTH_SHORT).show();
+                }else {
+                    Toast.makeText(audio_player.this,"Song Successfully Added to Library",Toast.LENGTH_SHORT).show();
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                getUserLibrary();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    thread.start();
+                }
+            }
+        });
+    }
+
+    public void getUserLibrary() throws IOException, JSONException {
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager()))
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .build();
+        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
+        Request request = new Request.Builder()
+                .url("https://damp-anchorage-73052.herokuapp.com/userLibrary")
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .build();
+        Response response = client.newCall(request).execute();
+        String jsonData = response.body().string();
+        if (!jsonData.startsWith("{")) {
+            jsonData = "{songs:" + jsonData + "}";
+            Log.d("JSON DATA", jsonData);
+            JSONObject temp = new JSONObject(jsonData);
+            final JSONArray jsonArray = temp.getJSONArray("songs");
+            handler.post(new Runnable(){
+                @Override
+                public void run(){
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String song_id = null;
+                        String song_name = null;
+                        try {
+
+                            song_id = jsonArray.getJSONObject(i).getString("_id");
+                            if (jsonArray.getJSONObject(i).has("title")) {
+                                song_name = jsonArray.getJSONObject(i).getString("title");
+                                if (song_name.equals(myTitle)) {
+                                    addPlaylistSong = song_id;
+                                    Log.d("songName", song_name);
+                                }
+                            }
+                            Log.d("playlistName", song_id);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Thread thread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    addSongToPlaylist();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        thread.start();
+                    }
+                }
+            });
+        }
+    }
+
+    public void addSongToPlaylist() throws IOException {
+        OkHttpClient client = new OkHttpClient.Builder().cookieJar((new JavaNetCookieJar(login.getCookieManager())))
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
+        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+        RequestBody body = RequestBody.create(mediaType, "playlistName="+selectedPlaylist+"&songId="+addPlaylistSong);
+        Request request = new Request.Builder()
+                .url("https://damp-anchorage-73052.herokuapp.com/addSongToPlaylist")
+                .post(body)
+                .addHeader("content-type", "application/x-www-form-urlencoded")
+                .addHeader("cache-control", "no-cache")
+                .build();
+        final Response response = client.newCall(request).execute();
+        final String jsonData = response.body().string();
+        //Log.d("add playlist message", jsonData);
+        handler.post(new Runnable(){
+            @Override
+            public void run(){
+                if(jsonData.contains("error")) {
+                    //Toast.makeText(audio_player.this,"Cannot be added to" + selectedPlaylist,Toast.LENGTH_SHORT).show();
+                }else {
+                    Toast.makeText(audio_player.this,"Song Successfully Added to " + selectedPlaylist,Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
 
     private void PlayPauseHandler(){
         fileSelected=false;
@@ -417,6 +692,40 @@ public class audio_player extends ListActivity {
             return v;
         }
     }
+
+    /***
+     * Service That Removes Notification if the App is Force Closed.
+     */
+    public static class notificationRemover extends Service {
+        public notificationRemover() {
+            super();
+        }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            return START_STICKY;
+        }
+
+        @Override
+        public void onCreate() {
+            HandlerThread thread = new HandlerThread("ServiceStartArguments",
+                    THREAD_PRIORITY_BACKGROUND);
+            thread.start();
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+
+        @Override
+        public void onTaskRemoved(Intent rootIntent) {
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.cancel(2);
+            stopSelf();
+        }
+    }
+
     private class notification {
         private NotificationManager nm;
         private NotificationCompat.Builder nb;
@@ -455,7 +764,6 @@ public class audio_player extends ListActivity {
     }
     @Override
     protected void onNewIntent (Intent intent) {
-        //Need code for handling buttons from notifications
         if(intent.hasExtra("Action")) {
             switch (intent.getStringExtra("Action")) {
                 case "Pause":
