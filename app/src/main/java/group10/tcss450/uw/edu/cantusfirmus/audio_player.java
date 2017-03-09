@@ -468,9 +468,9 @@ public class audio_player extends ListActivity {
             handler.post(new Runnable(){
                 @Override
                 public void run(){
+                    String song_id = null;
+                    String song_name = "";
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        String song_id = null;
-                        String song_name = null;
                         try {
 
                             song_id = jsonArray.getJSONObject(i).getString("_id");
@@ -485,18 +485,18 @@ public class audio_player extends ListActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Thread thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    addSongToPlaylist();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                        thread.start();
                     }
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                addSongToPlaylist();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    thread.start();
                 }
             });
         }
