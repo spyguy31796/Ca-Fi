@@ -1,16 +1,12 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
-import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.net.CookieManager;
-import java.net.HttpCookie;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.JavaNetCookieJar;
@@ -19,8 +15,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /***
- * Class to display registration info. More information will be shown here later.
- * Currently it is here to show that the user login works.
+ * Class to display registration info.
  * @author Alec Walsh
  * @version Feb 10 2017
  */
@@ -72,7 +67,6 @@ public class info extends AppCompatActivity {
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .build();
-        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/user_info")
                 .get()

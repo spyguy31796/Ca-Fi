@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +39,9 @@ public class login extends AppCompatActivity implements View.OnClickListener {
      * Handler to allow other threads to touch the UI thread.
      */
     private Handler handler;
+    /**
+     * The access to the shared preferences.
+     */
     private static SharedPreferences mPrefs;
     /***
      * Cookie manager to keep the login cookie.
@@ -49,6 +50,9 @@ public class login extends AppCompatActivity implements View.OnClickListener {
 
     /***
      * Oncreate method contains magic to store and restore login session from shared preferences.
+     * The previous session id is retrieved from the saved preferences and turned into a cookie
+     * which is then placed inside the cookie jar. The check user info method is then called which validates
+     * the cookie against the server.
      * @param savedInstanceState Required Parameter
      */
     @Override
@@ -62,19 +66,13 @@ public class login extends AppCompatActivity implements View.OnClickListener {
         CookieHandler.setDefault(cm);
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         String tempCookie = mPrefs.getString("session","");
-        //Log.d("COOKIE!!!",tempCookie);
         if(!(tempCookie.equals(""))){
             b.setEnabled(false);
             Toast.makeText(this, "Pre-existing session detected, attempting to login", Toast.LENGTH_SHORT).show();
-            //Cookie.parse(null,"str");
-            //Cookie.Builder ce = new Cookie.Builder();
             Cookie ce = new Cookie.Builder().domain("damp-anchorage-73052.herokuapp.com").name("session").value(tempCookie).httpOnly().build();
-            //Log.d("Generated Cookie",ce.toString());
             List cookie = new ArrayList();
             cookie.add(ce);
-            //Log.d("COOKIE ADDED","It was added");
             new JavaNetCookieJar(cm).saveFromResponse(HttpUrl.parse("https://damp-anchorage-73052.herokuapp.com/"),cookie);
-            //Log.d("Here is added cookie",cm.getCookieStore().getCookies().toString());
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -90,7 +88,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
     }
 
     /***
-     * Login function, creates and OkHttpClient and generates a request, seding it to the server. The response is stored,
+     * Login function, creates and OkHttpClient and generates a request, sending it to the server. The response is stored,
      * and the cookie is also kept.
      * @param login the email to use in the login attempt.
      * @param password the password to use in the login attempt.
@@ -112,12 +110,8 @@ public class login extends AppCompatActivity implements View.OnClickListener {
                 .addHeader("postman-token", "6001af9e-af55-fdfa-6ffa-7dbb370b2ac3")
                 .build();
         final Response response = client.newCall(request).execute();
-        //Log.d("RequestLogin",request.headers().toString());
-        //Log.d("response",response.peekBody(Long.valueOf("100")).string());
         final String[] details = response.body().string().split(",");
-
         if(cm.getCookieStore().getCookies().size()>0) {
-
             mPrefs.edit().putString("session", cm.getCookieStore().getCookies().get(cm.getCookieStore().getCookies().size() - 1).getValue()).apply();
         }
         handler.post(new Runnable(){
@@ -135,8 +129,7 @@ public class login extends AppCompatActivity implements View.OnClickListener {
             }
         });
     }
-
-    /***
+    /**
      * Click listener for the login button.
      * @param view the button clicked.
      */
@@ -164,10 +157,18 @@ public class login extends AppCompatActivity implements View.OnClickListener {
     public static CookieManager getCookieManager(){
         return cm;
     }
+
+    /**
+     * Clears out the shared preferences' stored session id, used when logging out, etc.
+     */
     public static void clearShared(){
         mPrefs.edit().putString("session","").apply();
     }
 
+    /**
+     * Tests a loaded cookie by using the same code from the get user info portion of the code.
+     * @throws IOException
+     */
     private void test_Cookie() throws IOException{
         OkHttpClient client = new OkHttpClient.Builder()
                 .cookieJar(new JavaNetCookieJar(login.getCookieManager()))
@@ -175,17 +176,14 @@ public class login extends AppCompatActivity implements View.OnClickListener {
                 .readTimeout(20, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
-        //Log.d("What cookie to use",cm.getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/user_info")
                 .get()
                 .addHeader("cache-control", "no-cache")
                 .addHeader("postman-token", "536e387f-52c2-946a-fdac-79006118dbc8")
                 .build();
-        //Log.d("Request",request.toString());
         Response response = client.newCall(request).execute();
         final String[] details = response.body().string().split(",");
-        //Log.d("LOOKLISTEN",details[0]);
         handler.post(new Runnable(){
             @Override
             public void run(){

@@ -1,18 +1,14 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
-import android.content.Context;
 import android.app.ProgressDialog;
 import android.content.Intent;
 
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.v4.graphics.BitmapCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,6 +47,9 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
      * Handler allowing other threads to touch the UI thread.
      */
     private Handler handler;
+    /**
+     * Bitmap image which will store album art.
+     */
     private static Bitmap bc = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,8 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
     /***
      * This method handles the interactions with the Youtube api. Searching for the first music video related to your search terms.
      * Then the video id is passed to our server where the video is processed and the mp3 is sent back in a response. The mp3 is saved in the
-     * cache and transitioned to the music player where it is played.
+     * cache and transitioned to the music player where it is played. Additionally, this method retrieves the image from the given video
+     * and saves it.
      * @throws IOException If there is a server issues, an IOException can be thrown.
      * @param progressDialog
      */
@@ -88,12 +88,10 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         List<SearchResult> searchResultList = searchResponse.getItems();
         if(searchResultList!=null&&searchResultList.size()>0){
             final String idString = searchResultList.get(0).get("id").toString().split(":")[1].replace("\"","").replace("}","");
-            Log.d("idString", idString);
             final String pictureString = searchResultList.get(0)
                     .get("snippet").toString().split(":")[3].replace("\"","").replace("}","")
                     +":"
                     +searchResultList.get(0).get("snippet").toString().split(":")[4].replace("\"","").replace("}","");
-            Log.d("thumbnail",pictureString);
             try{
                 URL url = new URL(pictureString);
                 bc = BitmapFactory.decodeStream(url.openConnection().getInputStream());
@@ -127,7 +125,6 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
             }
             out.flush();
             out.close();
-            //audio_player.setNetworkAudio(response);
             handler.post(new Runnable(){
                 /***
                  * The commented out code is for sending the video id to the youtube app instead of listening natively in the app.
@@ -135,12 +132,6 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                  */
                @Override
                 public void run(){
-                   //String urlString = "https://www.youtube.com/watch?v="+idString;
-                   //ClipboardManager clipboard = (ClipboardManager)
-                   //        getSystemService(Context.CLIPBOARD_SERVICE);
-                   //ClipData clip = ClipData.newPlainText("web-address",urlString);
-                   //clipboard.setPrimaryClip(clip);
-                   //Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
                    progressDialog.dismiss();
                    Intent intent = new Intent(find_music.this,audio_player.class);
                    Bundle b = new Bundle();
@@ -153,9 +144,6 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
                    intent.putExtras(b);
                    findViewById(R.id.search_btn).setEnabled(true);
                    startActivity(intent);
-                   //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-                   //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                   //((TextView)findViewById(R.id.displaySearch)).setText(urlString);
                }
             });
         }else{
@@ -191,9 +179,19 @@ public class find_music extends AppCompatActivity implements View.OnClickListene
         });
         thread.start();
     }
+
+    /**
+     * Small method allowing other classes to get the currently streaming image.
+     * @return the bitmap image.
+     */
     public static Bitmap getIcon(){
         return bc;
     }
+
+    /**
+     * Sets the bitmap image so other classes can change what is shown.
+     * @param bit the Bitmap to change the icon to.
+     */
     public static void setIcon(Bitmap bit){
         bc = bit;
     }

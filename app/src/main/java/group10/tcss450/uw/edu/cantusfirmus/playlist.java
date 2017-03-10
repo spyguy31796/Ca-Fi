@@ -1,12 +1,10 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,19 +13,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -54,9 +44,8 @@ public class playlist extends AppCompatActivity {
         setContentView(R.layout.activity_playlist);
         myClass = this;
         mylistView = (ListView) findViewById(R.id.playlist_name);
-        myMap = new HashMap<String, String>();
+        myMap = new HashMap<>();
         handler = new Handler();
-        Button createPlaylist = (Button) findViewById(R.id.playlist_button);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -72,6 +61,10 @@ public class playlist extends AppCompatActivity {
         thread.start();
     }
 
+    /**
+     * Generates the popup allowing a user to specify the new playlist name.
+     * @param view Required Parameter
+     */
     public void addPlaylist(View view) {
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(playlist.this);
         View mView = getLayoutInflater().inflate(R.layout.dialog_playlist, null);
@@ -108,13 +101,17 @@ public class playlist extends AppCompatActivity {
         });
     }
 
+    /**
+     * Retrieves all of the user's playlists.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     * @throws JSONException Thrown if the data received can not be correctly parsed in JSON.
+     */
     private void getUserPlaylists() throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager()))
                 .connectTimeout(3, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .build();
-        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/userPlaylists")
                 .get()
@@ -124,7 +121,6 @@ public class playlist extends AppCompatActivity {
         String jsonData = response.body().string();
         if (!jsonData.startsWith("{")) {
             jsonData = "{playlists:" + jsonData + "}";
-            Log.d("JSON DATA", jsonData);
             JSONObject temp = new JSONObject(jsonData);
             jsonArray = temp.getJSONArray("playlists");
             int playlist_number = jsonArray.length();
@@ -135,16 +131,13 @@ public class playlist extends AppCompatActivity {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         String playlist_name = null;
                         try {
-
                             playlist_name = jsonArray.getJSONObject(i).getString("name");
-                            Log.d("playlistName", playlist_name);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         String playlist_id = null;
                         try {
                             playlist_id = jsonArray.getJSONObject(i).getString("_id");
-                            Log.d("playlistId", playlist_id);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -168,6 +161,12 @@ public class playlist extends AppCompatActivity {
         }
     }
 
+    /**
+     * Adds a new playlist for the user to the server.
+     * @param playlist_name The name of te playlist.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     * @throws JSONException Thrown if the data received can not be correctly parsed in JSON.
+     */
     private void addUserPlaylists(String playlist_name) throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar((new JavaNetCookieJar(login.getCookieManager())))
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -184,7 +183,6 @@ public class playlist extends AppCompatActivity {
                 .build();
         final Response response = client.newCall(request).execute();
         final String jsonData = response.body().string();
-        Log.d("add playlist message", jsonData);
         handler.post(new Runnable(){
             @Override
             public void run(){
@@ -198,7 +196,4 @@ public class playlist extends AppCompatActivity {
             }
         });
     }
-
-
-
 }

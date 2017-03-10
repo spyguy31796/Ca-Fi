@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -19,11 +18,8 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 
 import okhttp3.JavaNetCookieJar;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /***
  * MainMenu of the application, after logging in, the user is presented this screen.
@@ -79,7 +75,6 @@ public class MainMenu extends AppCompatActivity {
      * Requests the permissions in accordance with marshmallow requirements.
      */
     public void requestPermissions(){
-        //Requests permissions
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_READ_STORAGE);
     }
@@ -96,9 +91,7 @@ public class MainMenu extends AppCompatActivity {
             case MY_PERMISSIONS_REQUEST_READ_STORAGE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Storage access is available
                 }else{
-                    //Permission Denied
                     Toast.makeText(MainMenu.this,"Storage Permission Denied, Playback Disabled",Toast.LENGTH_LONG).show();
                 }
                 return;
@@ -130,6 +123,9 @@ public class MainMenu extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /***
+     * Loads user playlist screen.
+     */
     private void userPlaylist() {
         Intent intent = new Intent(this, playlist.class);
         startActivity(intent);
@@ -186,6 +182,4 @@ public class MainMenu extends AppCompatActivity {
         });
 
     }
-
-
 }

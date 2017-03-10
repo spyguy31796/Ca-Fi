@@ -20,7 +20,6 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,9 +48,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static android.content.ContentValues.TAG;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static group10.tcss450.uw.edu.cantusfirmus.R.id.playlist_name;
 
 /**
  * This class holds the audio player and the components that make up the audio player activity.
@@ -59,7 +56,10 @@ import static group10.tcss450.uw.edu.cantusfirmus.R.id.playlist_name;
  * @version Feb 1 2017
  */
 public class audio_player extends ListActivity {
-
+    /**
+     * Here we set up the constants we will need, as well as all of the variables that need to
+     * be accessed by the entire class.
+     */
     private static final int UPDATE_FREQUENCY = 500;
     private static final int STEP_VALUE = 4000;
 
@@ -96,6 +96,11 @@ public class audio_player extends ListActivity {
     };
 
 
+    /**
+     * Initializes everything, also makes some changes based on if this activity was launched for local
+     * or streaming playback.
+     * @param savedInstanceState Required parameter.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,8 +120,6 @@ public class audio_player extends ListActivity {
         mp.setOnErrorListener(onErrorListener);
         mySeekbar.setOnSeekBarChangeListener(seekBarChangedListener);
         if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            Log.v(TAG, "Permission has been granted for thee who wish to ROCK AND ROLL");
-            //File write logic here
             Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
             if (null != cursor) {
 
@@ -139,8 +142,6 @@ public class audio_player extends ListActivity {
             fileSelected = true;
             String url = b.getString("web");
             i.removeExtra("web");
-            String title = b.getString("name");
-            i.removeExtra("name");
             String youtube = b.getString("youtubeId");
             i.removeExtra("youtubeId");
             String img = b.getString("imgurl");
@@ -150,19 +151,16 @@ public class audio_player extends ListActivity {
             if(songTitle!=null){
                 currentFile = songTitle;
             }
-            //Log.d("url",url);
-            if(url!=null) {
-                startPlay(url);
-            }
             if (youtube!=null) {
                 youtubeId = youtube;
                 imgurl = img;
                 myTitle = songTitle;
                 addToLibraryButton.setVisibility(View.VISIBLE);
             }
-            //startPlay(networkAudio.body().byteStream());
+            if(url!=null) {
+                startPlay(url);
+            }
         }catch(Exception ex){
-            //Log.d("Exception",ex.getMessage());
             ex.printStackTrace();
         }
         Thread thread = new Thread(new Runnable() {
@@ -221,7 +219,6 @@ public class audio_player extends ListActivity {
      */
     private void startPlay(String file) {
         nf = new notification(getApplicationContext());
-        Log.i("Selected: ", file);
         selelctedFile.setText(file);
         mySeekbar.setProgress(0);
 
@@ -356,13 +353,17 @@ public class audio_player extends ListActivity {
         }
     };
 
+    /**
+     * Creates an array of playlists for the add to playlist function.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     * @throws JSONException Thrown if the data received can not be correctly parsed in JSON.
+     */
     private void getUserPlaylists() throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager()))
                 .connectTimeout(3, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .build();
-        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/userPlaylists")
                 .get()
@@ -372,7 +373,6 @@ public class audio_player extends ListActivity {
         String jsonData = response.body().string();
         if (!jsonData.startsWith("{")) {
             jsonData = "{playlists:" + jsonData + "}";
-            Log.d("JSON DATA", jsonData);
             JSONObject temp = new JSONObject(jsonData);
             final JSONArray jsonArray = temp.getJSONArray("playlists");
             int playlist_number = jsonArray.length();
@@ -385,7 +385,6 @@ public class audio_player extends ListActivity {
                         try {
 
                             playlist_name = jsonArray.getJSONObject(i).getString("name");
-                            Log.d("playlistName", playlist_name);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -396,6 +395,11 @@ public class audio_player extends ListActivity {
         }
     }
 
+    /**
+     * Method to add streaming song to a given playlist.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     * @throws JSONException Thrown if the data received can not be correctly parsed in JSON.
+     */
     private void addSongToLibrary() throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar((new JavaNetCookieJar(login.getCookieManager())))
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -412,7 +416,6 @@ public class audio_player extends ListActivity {
                 .build();
         final Response response = client.newCall(request).execute();
         final String jsonData = response.body().string();
-        //Log.d("add playlist message", jsonData);
         handler.post(new Runnable(){
             @Override
             public void run(){
@@ -438,13 +441,17 @@ public class audio_player extends ListActivity {
         });
     }
 
+    /**
+     * Retrieves a user's library.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     * @throws JSONException Thrown if the data received can not be correctly parsed in JSON.
+     */
     public void getUserLibrary() throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar(new JavaNetCookieJar(login.getCookieManager()))
                 .connectTimeout(3, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .build();
-        //Log.d("What cookie to use",login.getCookieManager().getCookieStore().getCookies().get(0).getValue());
         Request request = new Request.Builder()
                 .url("https://damp-anchorage-73052.herokuapp.com/userLibrary")
                 .get()
@@ -454,7 +461,6 @@ public class audio_player extends ListActivity {
         String jsonData = response.body().string();
         if (!jsonData.startsWith("{")) {
             jsonData = "{songs:" + jsonData + "}";
-            Log.d("JSON DATA", jsonData);
             JSONObject temp = new JSONObject(jsonData);
             final JSONArray jsonArray = temp.getJSONArray("songs");
             handler.post(new Runnable(){
@@ -464,16 +470,13 @@ public class audio_player extends ListActivity {
                     String song_name = "";
                     for (int i = 0; i < jsonArray.length(); i++) {
                         try {
-
                             song_id = jsonArray.getJSONObject(i).getString("_id");
                             if (jsonArray.getJSONObject(i).has("title")) {
                                 song_name = jsonArray.getJSONObject(i).getString("title");
                                 if (song_name.equals(myTitle)) {
                                     addPlaylistSong = song_id;
-                                    Log.d("songName", song_name);
                                 }
                             }
-                            Log.d("playlistName", song_id);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -494,6 +497,10 @@ public class audio_player extends ListActivity {
         }
     }
 
+    /**
+     * Adds the current streaming song to a selected playlist.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     */
     public void addSongToPlaylist() throws IOException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar((new JavaNetCookieJar(login.getCookieManager())))
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -510,12 +517,11 @@ public class audio_player extends ListActivity {
                 .build();
         final Response response = client.newCall(request).execute();
         final String jsonData = response.body().string();
-        //Log.d("add playlist message", jsonData);
         handler.post(new Runnable(){
             @Override
             public void run(){
                 if(jsonData.contains("error")) {
-                    //Toast.makeText(audio_player.this,"Cannot be added to" + selectedPlaylist,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(audio_player.this,"Cannot be added to" + selectedPlaylist,Toast.LENGTH_SHORT).show();
                 }else {
                     Toast.makeText(audio_player.this,"Song Successfully Added to " + selectedPlaylist,Toast.LENGTH_SHORT).show();
                 }
@@ -524,6 +530,10 @@ public class audio_player extends ListActivity {
 
     }
 
+    /**
+     * Handles the playing and pausing of the music, this was relocated from the click handler so as to interface better
+     * with the notification buttons.
+     */
     private void PlayPauseHandler(){
         fileSelected=false;
         if(nf==null){
@@ -549,6 +559,10 @@ public class audio_player extends ListActivity {
             }
         }
     }
+
+    /**
+     * Handles skipping back.
+     */
     private void SkipBackHandler(){
         int seekto = mp.getCurrentPosition() - STEP_VALUE;
 
@@ -559,6 +573,10 @@ public class audio_player extends ListActivity {
         mp.seekTo(seekto);
         mp.start();
     }
+
+    /**
+     * Handles skipping forward.
+     */
     private void SkipForwardHandler(){
         int seekto = mp.getCurrentPosition() + STEP_VALUE;
 
@@ -593,7 +611,9 @@ public class audio_player extends ListActivity {
         }
     };
 
-
+    /**
+     * Listens to changes on the seekbar.
+     */
     private SeekBar.OnSeekBarChangeListener seekBarChangedListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
@@ -609,8 +629,6 @@ public class audio_player extends ListActivity {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (isSeekbarMoving) {
                 mp.seekTo(progress);
-
-                Log.i("OnSeekBarChangeListener", "onProgressChanged");
             }
         }
     };
@@ -684,7 +702,7 @@ public class audio_player extends ListActivity {
     }
 
     /***
-     * Service That Removes Notification if the App is Force Closed.
+     * A Service That Removes Notification if the App is Force Closed.
      */
     public static class notificationRemover extends Service {
         public notificationRemover() {
@@ -714,6 +732,12 @@ public class audio_player extends ListActivity {
         }
     }
 
+    /**
+     * The notification that is displayed when the music player is active.
+     * In the future, this entire class should be reworked to take advantage of services,
+     * The current implementation returns you to the app any time any of the buttons on a notification
+     * are pressed.
+     */
     private class notification {
         private NotificationManager nm;
         private NotificationCompat.Builder nb;
@@ -750,6 +774,14 @@ public class audio_player extends ListActivity {
             nm.cancel(2);
         }
     }
+
+    /**
+     * This is an overridden method which catches new intents sent to launch the audio player
+     * and turns them into commands. This works acceptable, however, the fact that a new intent is
+     * generated each time one of the actions is fired means that clicking any button on the notification
+     * will cause the audio player to be brought to the foreground.
+     * @param intent The intent captured.
+     */
     @Override
     protected void onNewIntent (Intent intent) {
         if(intent.hasExtra("Action")) {

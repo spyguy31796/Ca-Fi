@@ -5,12 +5,10 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -47,7 +45,7 @@ public class playlistsongs extends AppCompatActivity {
         handler = new Handler();
         myClass = this;
         mylistView= (ListView) findViewById(R.id.playlist_song_list);
-        myMap = new HashMap<String, String>();
+        myMap = new HashMap<>();
         final String playlistId = getIntent().getStringExtra("PLAY_LIST_ID");
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -62,6 +60,11 @@ public class playlistsongs extends AppCompatActivity {
         thread.start();
     }
 
+    /**
+     * Retrieves the songs saved into a playlist from the server.
+     * @param playlistId the id of the playlist to pull songs from.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     */
     public void getPlayListSongs(String playlistId) throws IOException {
         OkHttpClient client = new OkHttpClient.Builder().cookieJar((new JavaNetCookieJar(login.getCookieManager())))
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -78,7 +81,6 @@ public class playlistsongs extends AppCompatActivity {
                 .build();
         final Response response = client.newCall(request).execute();
         final String jsonData = response.body().string();
-        Log.d("add playlist message", jsonData);
         handler.post(new Runnable(){
             @Override
             public void run(){
@@ -129,6 +131,12 @@ public class playlistsongs extends AppCompatActivity {
         });
     }
 
+    /**
+     * Locates the music requested from the playlist and sends that intent to the audio player.
+     * @param playlist_src The playlist the song comes from.
+     * @param progressDialog The dialog box showing the progress of the load.
+     * @throws IOException Thrown if there is an issue connecting to the server or an issue with the response.
+     */
     public void playMusic(String playlist_src, final ProgressDialog progressDialog) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -145,8 +153,6 @@ public class playlistsongs extends AppCompatActivity {
                 .addHeader("postman-token", "4014accd-f315-a762-d57b-25613deb8758")
                 .build();
         Response response = client.newCall(request).execute();
-        //final File file = new File(Environment.getExternalStoragePublicDirectory(
-        //        Environment.DIRECTORY_MUSIC), query + ".mp3");
         final File file = new File(getFilesDir(),"cache.dat");
         OutputStream out = new FileOutputStream(file);
         byte buffer[] = new byte[6*1024];
@@ -156,7 +162,6 @@ public class playlistsongs extends AppCompatActivity {
         }
         out.flush();
         out.close();
-        //audio_player.setNetworkAudio(response);
         handler.post(new Runnable(){
             /***
              * The commented out code is for sending the video id to the youtube app instead of listening natively in the app.
@@ -164,12 +169,6 @@ public class playlistsongs extends AppCompatActivity {
              */
             @Override
             public void run(){
-                //String urlString = "https://www.youtube.com/watch?v="+idString;
-                //ClipboardManager clipboard = (ClipboardManager)
-                //        getSystemService(Context.CLIPBOARD_SERVICE);
-                //ClipData clip = ClipData.newPlainText("web-address",urlString);
-                //clipboard.setPrimaryClip(clip);
-                //Toast.makeText(find_music.this,"Address Copied to Clipboard!",Toast.LENGTH_LONG).show();
                 progressDialog.dismiss();
                 Intent intent = new Intent(playlistsongs.this,audio_player.class);
                 Bundle b = new Bundle();
