@@ -1,44 +1,33 @@
 package group10.tcss450.uw.edu.cantusfirmus;
 
-import android.app.IntentService;
 import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -49,11 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
@@ -162,8 +147,8 @@ public class audio_player extends ListActivity {
             i.removeExtra("imgurl");
             String songTitle = b.getString("title");
             i.removeExtra("title");
-            if(title!=null){
-                currentFile = title;
+            if(songTitle!=null){
+                currentFile = songTitle;
             }
             //Log.d("url",url);
             if(url!=null) {
